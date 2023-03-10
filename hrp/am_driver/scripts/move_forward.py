@@ -6,19 +6,24 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 import numpy as np
 from set_vel import calc_vel
-go_to_x_pos = 0 
-go_to_y_pos = 0 
+
+go_to_x_pos = 0
+go_to_y_pos = 0
+
+
 def pose_callback(pose):
-    x = pose.pose.position.x # get x position
-    y = pose.pose.position.y # get y position
+    x = pose.pose.position.x  # get x position
+    y = pose.pose.position.y  # get y position
     # rospy.loginfo("Automower position: x=%s, y=%s", x, y)
-    
+
     x_vel, z_vel = calc_vel(pose, go_to_x_pos, go_to_y_pos)
     twist.linear.x = x_vel
     twist.angular.z = z_vel
-rospy.init_node('move_forward')
-pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-sub = rospy.Subscriber('/pose', PoseStamped, pose_callback)
+
+
+rospy.init_node("move_forward")
+pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
+sub = rospy.Subscriber("/pose", PoseStamped, pose_callback)
 rate = rospy.Rate(10)
 
 twist = Twist()
@@ -41,4 +46,4 @@ twist.linear.x = 0.0
 twist.angular.z = 0.0
 pub.publish(twist)
 
-rospy.loginfo("Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos) 
+rospy.loginfo("Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos)
