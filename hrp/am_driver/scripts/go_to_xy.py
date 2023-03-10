@@ -44,6 +44,7 @@ def _calc_z_vel(error_angle, error_distance):
 
 
 def _calc_error_angle(z_dir, w_dir, x, y, x_goal, y_goal):
+def _calc_error_angle(z_dir, w_dir, x, y, x_goal, y_goal):
     # Convert quaternion orientation into yaw angle using formula from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
     t3 = +2.0 * (w_dir * z_dir)
     t4 = +1.0 - 2.0 * (z_dir * z_dir)
@@ -56,4 +57,5 @@ def _calc_error_angle(z_dir, w_dir, x, y, x_goal, y_goal):
         error_angle -= 2 * math.pi
     elif error_angle < -math.pi:
         error_angle += 2 * math.pi
+    return error_angle
     return error_angle
