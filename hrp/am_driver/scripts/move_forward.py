@@ -4,25 +4,26 @@
 import rospy
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
-
+import numpy as np
+from set_vel import calc_vel
+go_to_x_pos = 0 
+go_to_y_pos = 0 
 def pose_callback(pose):
-    print("hej")
     x = pose.pose.position.x # get x position
     y = pose.pose.position.y # get y position
-    z = pose.pose.position.z # get z position
-    rospy.loginfo("Automower position: x=%s, y=%s, z=%s", x, y, z)
-
+    # rospy.loginfo("Automower position: x=%s, y=%s", x, y)
+    
+    x_vel, z_vel = calc_vel(pose, go_to_x_pos, go_to_y_pos)
+    twist.linear.x = x_vel
+    twist.angular.z = z_vel
 rospy.init_node('move_forward')
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 sub = rospy.Subscriber('/pose', PoseStamped, pose_callback)
-rate = rospy.Rate(3)
+rate = rospy.Rate(10)
 
 twist = Twist()
-twist.linear.x = 0.1
-twist.angular.z = 0.0
-
 start_time = rospy.Time.now()
-duration = rospy.Duration(10)
+duration = rospy.Duration(15)
 
 while not rospy.is_shutdown():
     current_time = rospy.Time.now()
@@ -30,10 +31,14 @@ while not rospy.is_shutdown():
     if elapsed_time < duration:
         pub.publish(twist)
     else:
+        twist.linear.x = 0.0
+        twist.linear.y = 0.0
+        pub.publish(twist)
         break
     rate.sleep()
 
 twist.linear.x = 0.0
+twist.angular.z = 0.0
 pub.publish(twist)
 
-rospy.loginfo("Automower has moved two meters forward.")
+rospy.loginfo("Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos) 
