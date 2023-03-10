@@ -29,6 +29,14 @@ def pose_callback(pose):
     x_vel, z_vel = calc_vel(z_dir, w_dir, x, y, go_to_x_pos, go_to_y_pos)
     twist.linear.x = x_vel
     twist.angular.z = z_vel
+    if x_vel == 0 and z_vel == 0:
+        rospy.loginfo(
+            "Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos
+        )
+        rospy.signal_shutdown(
+            "Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos
+        )
+        rospy.is_shutdown()
 
 
 rospy.init_node("move_forward")
@@ -52,8 +60,7 @@ while not rospy.is_shutdown():
         break
     rate.sleep()
 
-twist.linear.x = 0.0
+twist.linear.x = 0.0 #just in case
 twist.angular.z = 0.0
 pub.publish(twist)
-
 rospy.loginfo("Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos)
