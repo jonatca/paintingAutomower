@@ -11,12 +11,7 @@ tolerance_position = 0.005  # meters
 tolerance_angle = 15 * np.pi / 180
 
 
-def calc_vel(pose, x_goal, y_goal):
-    x = pose.pose.position.x
-    y = pose.pose.position.y
-
-    z_dir = pose.pose.orientation.z  # get z direction
-    w_dir = pose.pose.orientation.w  # get w direction
+def calc_vel(z_dir, w_dir, x, y, x_goal, y_goal):
     # Convert quaternion orientation into yaw angle using formula from https://automaticaddison.com/how-to-convert-a-quaternion-into-euler-angles-in-python/
     t3 = +2.0 * (w_dir * z_dir)
     t4 = +1.0 - 2.0 * (z_dir * z_dir)
@@ -43,8 +38,7 @@ def calc_vel(pose, x_goal, y_goal):
         else:
             # Move forward until close enough to goal position
             x_vel = kp_linear * error_distance
-            if x_vel > max_lin_vel:
-                x_vel = max_lin_vel
+            x_vel = min(x_vel, max_lin_vel)
             z_vel = 0
     else:
         # Stop when close enough to goal position
