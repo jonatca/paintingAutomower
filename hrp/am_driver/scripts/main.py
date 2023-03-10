@@ -5,7 +5,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 import numpy as np
-from set_vel import calc_vel
+from go_to_xy import calc_vel
 
 go_to_x_pos = 0
 go_to_y_pos = 0
@@ -15,8 +15,10 @@ def pose_callback(pose):
     x = pose.pose.position.x  # get x position
     y = pose.pose.position.y  # get y position
     # rospy.loginfo("Automower position: x=%s, y=%s", x, y)
+    z_dir = pose.pose.orientation.z  # get z direction
+    w_dir = pose.pose.orientation.w  # get w direction
 
-    x_vel, z_vel = calc_vel(pose, go_to_x_pos, go_to_y_pos)
+    x_vel, z_vel = calc_vel(z_dir, w_dir, x, y, go_to_x_pos, go_to_y_pos)
     twist.linear.x = x_vel
     twist.angular.z = z_vel
 
