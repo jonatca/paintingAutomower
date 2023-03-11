@@ -3,7 +3,6 @@ import math
 
 max_lin_vel = 0.3
 max_ang_vel = 0.8
-# min_z_vel = 0.01
 start_slow_lin = 15 * np.pi / 180  # starts to slow down when error less than this
 start_slow_ang = 0.5
 kp_linear = 1  # these are tested to be good, not sure if they are the best
@@ -17,33 +16,29 @@ def calc_vel(z_dir, w_dir, x, y, x_goal, y_goal, update_freq):
     error_distance = math.sqrt((x_goal - x) ** 2 + (y_goal - y) ** 2)
     print("error_distance=", error_distance, "error_angle=", error_angle)
     if error_distance > tolerance_position:
-        z_vel = _calc_z_vel(error_angle, error_distance)
+        ang_vel = _calc_ang_vel(error_angle, error_distance)  # always rotate
         if abs(error_angle) > tolerance_angle:
-            x_vel = 0
-        else:
-            x_vel = max_lin_vel * np.sign(error_distance)
+            lin_vel = 0
+        else:  # if angle is small enough, move forward
+            lin_vel = max_lin_vel * np.sign(error_distance)
             if error_distance < start_slow_lin:
-                x_vel = kp_linear * max_lin_vel * error_distance / start_slow_lin
-            x_vel = min(np.abs(x_vel), np.abs(max_lin_vel))  # just in case
+                lin_vel = kp_linear * max_lin_vel * error_distance / start_slow_lin
+            lin_vel = min(np.abs(lin_vel), np.abs(max_lin_vel))  # just in case
     else:
-        x_vel = 0
-        z_vel = 0
+        lin_vel = 0
+        ang_vel = 0
 
-    print("x_vel=", x_vel, "z_vel=", z_vel)
-    return x_vel, z_vel
+    print("lin_vel=", lin_vel, "ang_vel=", ang_vel)
+    return lin_vel, ang_vel
 
 
-def _calc_z_vel(error_angle, error_distance):
-    z_vel = np.sign(error_angle) * max_ang_vel
+def _calc_ang_vel(error_angle, error_distance):
+    ang_vel = np.sign(error_angle) * max_ang_vel
     if error_angle < start_slow_ang:  # slow down when angle is small
-        z_vel = kp_angular * max_ang_vel * error_angle / start_slow_ang
-    # elif error_distance < start_slow_lin:  # when close rotate
-    #     z_vel = kp_angular * max_ang_vel * np.abs(error_distance) / error_distance
-    # if np.abs(z_vel) < np.abs(min_z_vel):
-    #     z_vel = np.sign(z_vel) * min_z_vel
-    if np.abs(z_vel) > np.abs(max_ang_vel):
-        z_vel = np.sign(z_vel) * max_ang_vel  # limit for safty reasons
-    return z_vel
+        ang_vel = kp_angular * max_ang_vel * error_angle / start_slow_ang
+    if np.abs(ang_vel) > np.abs(max_ang_vel):
+        ang_vel = np.sign(ang_vel) * max_ang_vel  # limit angluar velocity
+    return ang_vel
 
 
 def _calc_error_angle(z_dir, w_dir, x, y, x_goal, y_goal):

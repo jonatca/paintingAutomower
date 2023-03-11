@@ -54,16 +54,16 @@ def main():
 def pose_callback(pose):
     global reached_goal, duration
     if not reached_goal:
-        x = pose.pose.position.x  # get x position
-        y = pose.pose.position.y  # get y position
-        z_dir = pose.pose.orientation.z  # get z direction
-        w_dir = pose.pose.orientation.w  # get w direction
-        x_vel, z_vel = calc_vel(
+        x = pose.pose.position.x
+        y = pose.pose.position.y
+        z_dir = pose.pose.orientation.z  # a angle
+        w_dir = pose.pose.orientation.w  # another angle, strange coordinate system
+        lin_vel, ang_vel = calc_vel(
             z_dir, w_dir, x, y, go_to_x_pos, go_to_y_pos, update_freq
         )
-        twist.linear.x = x_vel
-        twist.angular.z = z_vel
-        if x_vel == 0 and z_vel == 0:
+        twist.linear.x = lin_vel
+        twist.angular.z = ang_vel
+        if lin_vel == 0 and ang_vel == 0:
             twist.linear.x = 0
             twist.angular.z = 0
             rospy.is_shutdown()
