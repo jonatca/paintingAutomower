@@ -11,12 +11,17 @@ from go_to_xy import (
     calc_vel,
 )  # error? is go_to_xy.pyc in calculations folder? try chmod 777 go_to_xy.py and catkin_make
 
-go_to_x_pos = 1
+go_to_x_pos = 6
 go_to_y_pos = 0
 update_freq = 10
-duration_s = 10
+duration_s = 40
 reached_goal = False
+first_pos = True
 twist = Twist()
+x_start = 0
+y_start = 0
+z_start = 0
+w_start = 0
 
 
 def main():
@@ -52,12 +57,23 @@ def main():
 
 
 def pose_callback(pose):
-    global reached_goal, duration
+    global reached_goal, duration, first_pos, x_start, y_start, z_start, w_start
     if not reached_goal:
         x = pose.pose.position.x
         y = pose.pose.position.y
         z_dir = pose.pose.orientation.z  # a angle
         w_dir = pose.pose.orientation.w  # another angle, strange coordinate system
+        if first_pos:
+            x_start = x
+            y_start = y
+            z_start = z_dir
+            w_start = w_dir
+            first_pos = False
+        x = x - x_start
+        y = y - y_start
+        z_dir = z_dir - z_start
+        w_dir = w_dir - w_start
+        print("x: ", x, "y: ", y)
         lin_vel, ang_vel = calc_vel(
             z_dir, w_dir, x, y, go_to_x_pos, go_to_y_pos, update_freq
         )
