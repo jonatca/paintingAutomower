@@ -7,9 +7,11 @@ import rospy
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 import numpy as np
-from go_to_xy import calc_vel  # works even if red underscored?
+from go_to_xy import (
+    calc_vel,
+)  # error? is go_to_xy.pyc in calculations folder? try chmod 777 go_to_xy.py and catkin_make
 
-go_to_x_pos = 0
+go_to_x_pos = 0.5
 go_to_y_pos = 0
 update_freq = 10
 duration = 10
@@ -55,14 +57,14 @@ while not rospy.is_shutdown() and not reached_goal:
     if elapsed_time < duration:
         pub.publish(twist)
     else:
-        twist.linear.x = 0.0
-        twist.angular.z = 0.0
+        twist.linear.x = 0
+        twist.angular.z = 0
         pub.publish(twist)
         break
     rate.sleep()
 
-twist.linear.x = 0.0
-twist.angular.z = 0.0
+twist.linear.x = 0
+twist.angular.z = 0
 pub.publish(twist)
 
 rospy.loginfo("Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos)
