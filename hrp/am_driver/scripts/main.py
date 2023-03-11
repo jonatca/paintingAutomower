@@ -1,22 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 
+sys.path.append("/home/kandidatarbete/450/src/calculations")
 import rospy
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 import numpy as np
-from go_to_xy import calc_vel
+from go_to_xy import calc_vel  # works even if red underscored?
 
-go_to_x_pos = 1
+go_to_x_pos = 0
 go_to_y_pos = 0
 update_freq = 10
-
+duration = 10
 
 reached_goal = False
 
 
 def pose_callback(pose):
-    global reached_goal
+    global reached_goal, duration
     if not reached_goal:
         x = pose.pose.position.x  # get x position
         y = pose.pose.position.y  # get y position
@@ -30,16 +32,12 @@ def pose_callback(pose):
         twist.linear.x = x_vel
         twist.angular.z = z_vel
         if x_vel == 0 and z_vel == 0:
-            twist.linear.x = x_vel
-            twist.angular.z = z_vel
-            # turn off program
-
-            # rospy.is_shutdown()
-            # rospy.loginfo(
-            #     "Automower has reached position x=%s, y=%s", go_to_x_pos, go_to_y_pos
-            # )
+            twist.linear.x = 0
+            twist.angular.z = 0
+            rospy.is_shutdown()
+            rospy.loginfo("Automower has reached position x=%s, y=%s", x, y)
+            duration = elapsed_time
             reached_goal = True
-            rospy.signal_shutdown("Reached goal position")
 
 
 rospy.init_node("move_forward")
@@ -58,7 +56,7 @@ while not rospy.is_shutdown() and not reached_goal:
         pub.publish(twist)
     else:
         twist.linear.x = 0.0
-        twist.linear.y = 0.0
+        twist.angular.z = 0.0
         pub.publish(twist)
         break
     rate.sleep()

@@ -8,7 +8,7 @@ start_slow_lin = 15 * np.pi / 180  # starts to slow down when error less than th
 start_slow_ang = 0.5
 kp_linear = 1  # these are tested to be good, not sure if they are the best
 kp_angular = 0.5
-tolerance_position = 0.01  # meters
+tolerance_position = 0.1  # meters
 tolerance_angle = 5 * np.pi / 180
 
 
