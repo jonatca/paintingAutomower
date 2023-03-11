@@ -9,6 +9,7 @@ from go_to_xy import calc_vel
 
 go_to_x_pos = 0
 go_to_y_pos = 0
+update_freq = 10
 
 
 def pose_callback(pose):
@@ -18,7 +19,7 @@ def pose_callback(pose):
     z_dir = pose.pose.orientation.z  # get z direction
     w_dir = pose.pose.orientation.w  # get w direction
 
-    x_vel, z_vel = calc_vel(z_dir, w_dir, x, y, go_to_x_pos, go_to_y_pos)
+    x_vel, z_vel = calc_vel(z_dir, w_dir, x, y, go_to_x_pos, go_to_y_pos, update_freq)
     twist.linear.x = x_vel
     twist.angular.z = z_vel
 
@@ -26,7 +27,7 @@ def pose_callback(pose):
 rospy.init_node("move_forward")
 pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
 sub = rospy.Subscriber("/pose", PoseStamped, pose_callback)
-rate = rospy.Rate(10)
+rate = rospy.Rate(update_freq)
 
 twist = Twist()
 start_time = rospy.Time.now()
