@@ -49,7 +49,8 @@ def _calc_error_angle(z_dir, w_dir, x, y, x_goal, y_goal):
     # Calculate desired angle that points towards goal position using trigonometry
     desired_angle = math.atan2(y_goal - y, x_goal - x)
     # Calculate error between desired and current angles
-    error_angle = math.fmod(desired_angle - current_angle, 2 * math.pi)
+    # error_angle = math.fmod(desired_angle - current_angle, 2 * math.pi)
+    error_angle = desired_angle - current_angle
     if error_angle > math.pi:
         error_angle -= 2 * math.pi
     elif error_angle < -math.pi:
