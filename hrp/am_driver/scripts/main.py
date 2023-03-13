@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
+import tf
 
 sys.path.append("/home/kandidatarbete/450/src/calculations")
 import rospy
@@ -16,10 +17,10 @@ import go_to_xy_PID4
 # from go_to_xy_p import calc_k_vel
 import math
 
-go_to_x_pos = 0.9
-go_to_y_pos = 0
+go_to_x_pos = 1
+go_to_y_pos = 2.33
 update_freq = 10
-duration_s = 10
+duration_s = 1
 reached_goal = False
 first_pos = True
 twist = Twist()
@@ -27,6 +28,15 @@ x_start = 0
 y_start = 0
 z_start = 0
 w_start = 0
+start_angle = 0
+pid = None
+pid = go_to_xy_PID4.PID(
+    x_start,
+    y_start,
+    go_to_x_pos + x_start,
+    go_to_y_pos + y_start,
+    update_freq,
+)
 
 
 def main():
@@ -61,34 +71,47 @@ def main():
     )
 
 
+def calc_angle(z_dir, w_dir):
+    t3 = +2.0 * (w_dir * z_dir)
+    t4 = +1.0 - 2.0 * (z_dir * z_dir)
+    current_angle = np.arctan2(t3, t4)
+    return current_angle
+
+
 def pose_callback(pose):
-    global reached_goal, duration, first_pos, x_start, y_start, z_start, w_start, pid
+    global reached_goal, duration, first_pos, x_start, y_start, z_start, w_start, pid, start_angle
     if not reached_goal:
-        x = pose.pose.position.x
-        y = pose.pose.position.y
-        z_dir = pose.pose.orientation.z
-        w_dir = pose.pose.orientation.w
-        t3 = +2.0 * (w_dir * z_dir)
-        t4 = +1.0 - 2.0 * (z_dir * z_dir)
-        current_angle = math.atan2(t3, t4)
+        x_map = pose.pose.position.x
+        y_map = pose.pose.position.y
+        z_map = pose.pose.orientation.z
+        w_map = pose.pose.orientation.w
+
         if first_pos:
-            x_start = x
-            y_start = y
-            z_start = z_dir
-            w_start = w_dir
-            pid = go_to_xy_PID4.PID(
-                x_start,
-                y_start,
-                go_to_x_pos + x_start,
-                go_to_y_pos + y_start,
-                update_freq,
+            listener = tf.TransformListener()
+            listener.waitForTransform(
+                "base_link", "map", rospy.Time(), rospy.Duration(4.0)
             )
-            start_angle = current_angle  # angle is wrong
+            point_in_base_link, rot_in_base_link = listener.lookupTransform(
+                "base_link", "map", rospy.Time(0)
+            )
+            x_start = point_in_base_link[0]
+            y_start = point_in_base_link[1]
             first_pos = False
 
-        print("x: ", x, "y: ", y)
-        lin_vel, ang_vel = pid.calc_vel(current_angle, x, y)
-        # lin_vel, ang_vel = calc_k_vel(current_angle, x, y)
+        listener = tf.TransformListener()
+        listener.waitForTransform("base_link", "map", rospy.Time(), rospy.Duration(4.0))
+        point_in_base_link, rot_in_base_link = listener.lookupTransform(
+            "base_link", "map", rospy.Time(0)
+        )
+        x_base = x_map - point_in_base_link[0]
+        y_base = y_map - point_in_base_link[1]
+        theta_base = tf.transformations.euler_from_quaternion(rot_in_base_link)[2]
+
+        current_angle = calc_angle(z_map, w_map)  # - start_angle
+        current_angle = (current_angle + np.pi) % (2 * np.pi) - np.pi
+        print("x: ", round(x_base, 2), "y: ", round(y_base, 2))
+        lin_vel, ang_vel = pid.calc_vel(current_angle, x_base, y_base)
+        # lin_vel, ang_vel = calc_k_vel(current_angle, x_base, y_base)
         twist.linear.x = lin_vel
         twist.angular.z = ang_vel
 

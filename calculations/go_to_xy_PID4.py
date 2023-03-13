@@ -1,18 +1,10 @@
 import numpy as np
 
 
-class PIDController:
+class PID:
     def __init__(self, x_start, y_start, x_goal, y_goal, update_freq):
         self.Kp_l = 0.5
-        self.Ki_l = 0.01
-        self.Kd_l = 0.2
-        self.Kp_a = 0.8
-        self.Ki_a = 0.01
-        self.Kd_a = 0.2
-        self.integral_l = 0
-        self.integral_a = 0
-        self.prev_error_l = 0
-        self.prev_error_a = 0
+        self.Kp_a = 0.5
         self.x_start = x_start
         self.y_start = y_start
         self.x_goal = x_goal
@@ -21,29 +13,37 @@ class PIDController:
 
     def calc_vel(self, current_angle, x, y):
         # Calculate linear velocity
-        dist_to_goal = np.sqrt((self.x_goal - x) ** 2 + (self.y_goal - y) ** 2)
-        error_l = dist_to_goal
-        self.integral_l += error_l * self.update_time
-        derivative_l = (error_l - self.prev_error_l) / self.update_time
-        output_l = (
-            self.Kp_l * error_l + self.Ki_l * self.integral_l + self.Kd_l * derivative_l
-        )
-        output_l = np.clip(output_l, -0.3, 0.3)
-        self.prev_error_l = error_l
+        error_lin = np.sqrt((self.x_goal - x) ** 2 + (self.y_goal - y) ** 2)
+        vel_lin = self.Kp_l * error_lin
+        vel_lin = np.clip(vel_lin, -0.3, 0.3)
+        self.prev_error_lin = error_lin
 
         # Calculate angular velocity
         goal_angle = np.arctan2(self.y_goal - y, self.x_goal - x)
-        error_a = goal_angle - current_angle
-        if error_a > np.pi:
-            error_a -= 2 * np.pi
-        elif error_a < -np.pi:
-            error_a += 2 * np.pi
-        self.integral_a += error_a * self.update_time
-        derivative_a = (error_a - self.prev_error_a) / self.update_time
-        output_a = (
-            self.Kp_a * error_a + self.Ki_a * self.integral_a + self.Kd_a * derivative_a
+        error_ang = goal_angle - current_angle
+        error_ang = (error_ang + np.pi) % (2 * np.pi) - np.pi
+        # vel_ang = self.Kp_a * error_ang
+        # vel_ang = np.clip(vel_ang, -0.8, 0.8)
+        vel_ang = np.sign(error_ang) * 0.2
+        if error_lin < 0.1:
+            vel_lin = 0
+            vel_ang = 0
+        if np.abs(error_ang) > 0.3:
+            vel_lin = 0
+        print(
+            "error_lin: ",
+            round(error_lin, 2),
+            "vel_lin: ",
+            round(vel_lin, 2),
         )
-        output_a = np.clip(output_a, -0.8, 0.8)
-        self.prev_error_a = error_a
-
-        return output_a, output_l
+        print(
+            "current_angle",
+            round(current_angle, 2),
+            "goal_angle",
+            round(goal_angle, 2),
+            "error_ang: ",
+            round(error_ang, 2),
+            "vel_ang: ",
+            round(vel_ang, 2),
+        )
+        return vel_lin, vel_ang
