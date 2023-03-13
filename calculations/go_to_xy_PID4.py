@@ -10,40 +10,69 @@ class PID:
         self.x_goal = x_goal
         self.y_goal = y_goal
         self.update_time = 1.0 / update_freq
+        self.tol_lin = 0.05
+        self.tol_ang = 0.2
+        self.current_ang = None
+        self.error_lin = None
+        self.vel_lin = None
+        self.x = None
+        self.y = None
+        self.prev_error_lin = 0
 
-    def calc_vel(self, current_angle, x, y):
-        # Calculate linear velocity
-        error_lin = np.sqrt((self.x_goal - x) ** 2 + (self.y_goal - y) ** 2)
-        vel_lin = self.Kp_l * error_lin
-        vel_lin = np.clip(vel_lin, -0.3, 0.3)
-        self.prev_error_lin = error_lin
+    def calc_vel(self, current_ang, x, y):
+        self.current_ang = current_ang
+        self.x = x
+        self.y = y
+        self.error_lin = np.sqrt(
+            (self.x_goal - self.x) ** 2 + (self.y_goal - self.y) ** 2
+        )
+        self.vel_lin = self.Kp_l * self.error_lin
+        self.vel_lin = np.clip(self.vel_lin, -0.3, 0.3)
+        self.prev_error_lin = self.error_lin
 
         # Calculate angular velocity
-        goal_angle = np.arctan2(self.y_goal - y, self.x_goal - x)
-        error_ang = goal_angle - current_angle
-        error_ang = (error_ang + np.pi) % (2 * np.pi) - np.pi
-        # vel_ang = self.Kp_a * error_ang
-        # vel_ang = np.clip(vel_ang, -0.8, 0.8)
-        vel_ang = np.sign(error_ang) * 0.2
-        if error_lin < 0.1:
-            vel_lin = 0
-            vel_ang = 0
-        if np.abs(error_ang) > 0.3:
-            vel_lin = 0
+        self.goal_ang = np.arctan2(self.y_goal - self.y, self.x_goal - self.x)
+        self.error_ang = self.goal_ang - self.current_ang
+        self.error_ang = (self.error_ang + np.pi) % (2 * np.pi) - np.pi
+        # self.vel_ang = self.Kp_a * self.error_ang
+        # self.vel_ang = np.clip(self.vel_ang, -0.8, 0.8)
+        self.vel_ang = np.sign(self.error_ang) * 0.3
+        if self.error_lin < self.tol_lin:
+            self.vel_lin = 0
+            self.vel_ang = 0
+        if np.abs(self.error_ang) > self.tol_ang:
+            self.vel_lin = 0
+        self.log_message()
+        return self.vel_lin, self.vel_ang
+
+    def log_message(self):
         print(
             "error_lin: ",
-            round(error_lin, 2),
+            round(self.error_lin, 2),
             "vel_lin: ",
-            round(vel_lin, 2),
+            round(self.vel_lin, 2),
         )
         print(
-            "current_angle",
-            round(current_angle, 2),
-            "goal_angle",
-            round(goal_angle, 2),
+            "current_ang",
+            round(self.current_ang, 2),
+            "goal_ang",
+            round(self.goal_ang, 2),
             "error_ang: ",
-            round(error_ang, 2),
+            round(self.error_ang, 2),
             "vel_ang: ",
-            round(vel_ang, 2),
+            round(self.vel_ang, 2),
         )
-        return vel_lin, vel_ang
+        print(
+            "x",
+            round(self.x, 2),
+            "y",
+            round(self.y, 2),
+            "x_goal",
+            round(self.x_goal, 2),
+            "y_goal",
+            round(self.y_goal, 2),
+            "lin_vel",
+            round(self.vel_lin, 2),
+            "ang_vel",
+            round(self.vel_ang, 2),
+        )
