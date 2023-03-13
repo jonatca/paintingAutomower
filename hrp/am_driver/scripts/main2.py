@@ -2,21 +2,20 @@
 
 import sys
 
+
 sys.path.append("/home/kandidatarbete/450/src/calculations")
 import rospy
 import tf2_ros
 import tf.transformations
-
+import signal
 from geometry_msgs.msg import Twist, PoseStamped
 import go_to_xy_PID4
 
 # Target position in the base_link frame
-target_x = 2
+target_x = 4
 target_y = 2.33
 
 # PID controller parameters
-kp_l = 0.5
-kp_a = 0.5
 update_freq = 10.0
 
 # Initialize global variables
@@ -31,6 +30,14 @@ def main():
     pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
     sub = rospy.Subscriber("/pose", PoseStamped, pose_callback)
     rate = rospy.Rate(update_freq)
+
+    def signal_handler(sig, frame):  # stops the robot when ctrl+c is pressed
+        twist.linear.x = 0.0
+        twist.angular.z = 0.0
+        pub.publish(twist)
+        rospy.signal_shutdown("User interrupted")
+
+    signal.signal(signal.SIGINT, signal_handler)
 
     while not rospy.is_shutdown() and not reached_goal:
         pub.publish(twist)
