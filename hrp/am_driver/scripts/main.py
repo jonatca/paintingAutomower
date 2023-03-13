@@ -1,129 +1,96 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import sys
-import tf
 
 sys.path.append("/home/kandidatarbete/450/src/calculations")
 import rospy
-from geometry_msgs.msg import Twist
-from geometry_msgs.msg import PoseStamped
+import tf.transformations
+import signal
+from geometry_msgs.msg import Twist, PoseStamped
 import numpy as np
-from go_to_xy import (
-    calc_vel,
-)  # error? is go_to_xy.pyc in calculations folder? try chmod 777 go_to_xy.py and catkin_make
-import go_to_xy_PID3
-import go_to_xy_PID4
-
-# from go_to_xy_p import calc_k_vel
-import math
-
-go_to_x_pos = 1
-go_to_y_pos = 2.33
-update_freq = 10
-duration_s = 1
-reached_goal = False
-first_pos = True
-twist = Twist()
-x_start = 0
-y_start = 0
-z_start = 0
-w_start = 0
-start_angle = 0
-pid = None
-pid = go_to_xy_PID4.PID(
-    x_start,
-    y_start,
-    go_to_x_pos + x_start,
-    go_to_y_pos + y_start,
-    update_freq,
-)
+import go_to_xy_P
 
 
-def main():
-    global elapsed_time
-    rospy.init_node("move_forward")
-    pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
-    sub = rospy.Subscriber("/pose", PoseStamped, pose_callback)
-    rate = rospy.Rate(update_freq)
+class Drive_to:
+    def __init__(self, x_goal_prim, y_goal_prim, reset_angle=True):
+        self.update_freq = 10.0  # Hz but doesn't work? stuck at 10 Hz
+        self.x_goal_prim = x_goal_prim
+        self.y_goal_prim = y_goal_prim
+        self.x = None
+        self.y = None
+        self.x_start = None
+        self.y_start = None
+        self.init_angle = None
+        self.reset_angle = reset_angle
+        self.twist = Twist()
 
-    start_time = rospy.Time.now()
-    duration = rospy.Duration(duration_s)
+        self.pid = None  # go_to_xy_P.P(self.x_goal, self.y_goal, self.update_freq)
+        self.reached_goal = False
+        rospy.init_node("move_forward")
+        self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
+        sub = rospy.Subscriber("/pose", PoseStamped, self.pose_callback)
+        self.rate = rospy.Rate(self.update_freq)
 
-    while not rospy.is_shutdown() and not reached_goal:
-        current_time = rospy.Time.now()
-        elapsed_time = current_time - start_time
-        if elapsed_time < duration:
-            pub.publish(twist)
-        else:
-            twist.linear.x = 0
-            twist.angular.z = 0
-            pub.publish(twist)
-            break
-        rate.sleep()
-
-    twist.linear.x = 0
-    twist.angular.z = 0
-    pub.publish(twist)
-    rospy.is_shutdown()
-
-    rospy.loginfo(
-        "Automower has moved to position x=%s, y=%s", go_to_x_pos, go_to_y_pos
-    )
-
-
-def calc_angle(z_dir, w_dir):
-    t3 = +2.0 * (w_dir * z_dir)
-    t4 = +1.0 - 2.0 * (z_dir * z_dir)
-    current_angle = np.arctan2(t3, t4)
-    return current_angle
-
-
-def pose_callback(pose):
-    global reached_goal, duration, first_pos, x_start, y_start, z_start, w_start, pid, start_angle
-    if not reached_goal:
-        x_map = pose.pose.position.x
-        y_map = pose.pose.position.y
-        z_map = pose.pose.orientation.z
-        w_map = pose.pose.orientation.w
-
-        if first_pos:
-            listener = tf.TransformListener()
-            listener.waitForTransform(
-                "base_link", "map", rospy.Time(), rospy.Duration(4.0)
-            )
-            point_in_base_link, rot_in_base_link = listener.lookupTransform(
-                "base_link", "map", rospy.Time(0)
-            )
-            x_start = point_in_base_link[0]
-            y_start = point_in_base_link[1]
-            first_pos = False
-
-        listener = tf.TransformListener()
-        listener.waitForTransform("base_link", "map", rospy.Time(), rospy.Duration(4.0))
-        point_in_base_link, rot_in_base_link = listener.lookupTransform(
-            "base_link", "map", rospy.Time(0)
+    def goal_coords(self):  # prim coordinates => automowers relative coordinates
+        x_goal = (
+            self.x_start
+            + self.x_goal_prim * np.cos(self.init_angle)
+            - self.y_goal_prim * np.sin(self.init_angle)
         )
-        x_base = x_map - point_in_base_link[0]
-        y_base = y_map - point_in_base_link[1]
-        theta_base = tf.transformations.euler_from_quaternion(rot_in_base_link)[2]
+        y_goal = (
+            self.y_start
+            + self.x_goal_prim * np.sin(self.init_angle)
+            + self.y_goal_prim * np.cos(self.init_angle)
+        )
+        return x_goal, y_goal  # given in automowers global coordinates
 
-        current_angle = calc_angle(z_map, w_map)  # - start_angle
-        current_angle = (current_angle + np.pi) % (2 * np.pi) - np.pi
-        print("x: ", round(x_base, 2), "y: ", round(y_base, 2))
-        lin_vel, ang_vel = pid.calc_vel(current_angle, x_base, y_base)
-        # lin_vel, ang_vel = calc_k_vel(current_angle, x_base, y_base)
-        twist.linear.x = lin_vel
-        twist.angular.z = ang_vel
+    def drive(self):
+        signal.signal(
+            signal.SIGINT, self.ctrlc_shutdown
+        )  # shuts down when ctrl+c is pressed
+        while not rospy.is_shutdown() and not self.reached_goal:
+            self.pub.publish(self.twist)
+            self.rate.sleep()
+        self.twist.linear.x = 0.0
+        self.twist.angular.z = 0.0
+        self.pub.publish(self.twist)
+        rospy.loginfo(
+            "Automower has moved to position x=%s, y=%s",
+            round(self.x, 2),
+            round(self.y, 2),
+        )
 
-        if lin_vel == 0 and ang_vel == 0:
-            twist.linear.x = 0
-            twist.angular.z = 0
-            rospy.signal_shutdown("Automower has reached position goal position")
-            duration = elapsed_time
-            reached_goal = True
-    else:
-        print("Goal reached")
+    def pose_callback(self, pose):
+        z_dir = pose.pose.orientation.z
+        w_dir = pose.pose.orientation.w
+        current_ang = tf.transformations.euler_from_quaternion([0, 0, z_dir, w_dir])[2]
+        if (
+            self.reset_angle
+            and self.init_angle is None
+            and self.x_start is None
+            and self.y_start is None
+        ):
+            self.init_angle = current_ang
+            self.x_start = pose.pose.position.x
+            self.y_start = pose.pose.position.y
+            x_goal, y_goal = self.goal_coords()
+            self.pid = go_to_xy_P.P(x_goal, y_goal, self.update_freq)
+        self.x = pose.pose.position.x
+        self.y = pose.pose.position.y
+        lin_vel, ang_vel = self.pid.calc_vel(current_ang, self.x, self.y)
+        self.twist.linear.x = lin_vel
+        self.twist.angular.z = ang_vel
+        if lin_vel == 0.0 and ang_vel == 0.0:
+            self.reached_goal = True
+
+    def ctrlc_shutdown(self, sig, frame):
+        self.twist.linear.x = 0.0
+        self.twist.angular.z = 0.0
+        self.pub.publish(self.twist)
+        rospy.signal_shutdown("User interrupted by ctrl+c")
 
 
 if __name__ == "__main__":
-    main()
+    x_goal = -1  # positive x = forward
+    y_goal = 0  # positive y = left
+    drive_to = Drive_to(x_goal, y_goal)
+    drive_to.drive()
