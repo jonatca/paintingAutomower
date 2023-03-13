@@ -6,7 +6,7 @@ import rospy
 import tf.transformations
 import signal
 from geometry_msgs.msg import Twist, PoseStamped
-import go_to_xy_PID4
+import go_to_xy_P
 
 
 class Drive_to:
@@ -17,7 +17,7 @@ class Drive_to:
         self.x = None
         self.y = None
         self.twist = Twist()
-        self.pid = go_to_xy_PID4.PID(0, 0, self.x_goal, self.y_goal, self.update_freq)
+        self.pid = go_to_xy_P.P(0, 0, self.x_goal, self.y_goal, self.update_freq)
         self.reached_goal = False
         rospy.init_node("move_forward")
         self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
@@ -60,7 +60,7 @@ class Drive_to:
 
 
 if __name__ == "__main__":
-    x_goal = 0.3
-    y_goal = 0
+    x_goal = 0.5
+    y_goal = 0.5
     drive_to = Drive_to(x_goal, y_goal)
     drive_to.drive()
