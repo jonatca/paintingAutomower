@@ -7,7 +7,7 @@ import tf.transformations
 import signal
 from geometry_msgs.msg import Twist, PoseStamped
 import numpy as np
-import go_to_xy_P
+from calc_velocities import CalcVelocities
 from paint import get_user_input
 
 
@@ -21,7 +21,6 @@ class Drive_to:
         self.init_angle = None
         self.reset_angle = reset_angle
         self.twist = Twist()
-        self.hasMoved = False
 
         self.pid = None  # go_to_xy_P.P(self.x_goal, self.y_goal, self.update_freq)
         self.reached_goal = False
@@ -33,7 +32,7 @@ class Drive_to:
 
     def change_coord_sys(
         self, x_goal_prim, y_goal_prim
-    ):  # prim coordinates => automowers relative coordinates
+    ):  # automowers relative coordinates => global coordinates
         x_goal = (
             self.x_start
             + x_goal_prim * np.cos(self.init_angle)
@@ -44,7 +43,7 @@ class Drive_to:
             + x_goal_prim * np.sin(self.init_angle)
             + y_goal_prim * np.cos(self.init_angle)
         )
-        return x_goal, y_goal  # given in automowers global coordinates
+        return x_goal, y_goal  # automowers global coordinates
 
     def drive(self):
         signal.signal(
@@ -75,7 +74,7 @@ class Drive_to:
             self.init_angle = current_ang
             self.x_start = pose.pose.position.x
             self.y_start = pose.pose.position.y
-            self.pid = go_to_xy_P.P(self.update_freq)
+            self.pid = CalcVelocities(self.update_freq)
             self.change_goal()  # sets initial goal
         self.x = pose.pose.position.x
         self.y = pose.pose.position.y
@@ -87,7 +86,7 @@ class Drive_to:
         # if not (ang_vel == 0.0 and lin_vel == 0.0):
         #     self.hasMoved = True
 
-    def change_goal(self):
+    def change_goal(self):  # TODO contains bug if want to start not in origo
         if len(self.paint_order) > 0:
             if "start" in self.paint_order[0]:
                 x_goal_prim, y_goal_prim = self.paint_order[0]["start"]
@@ -115,7 +114,5 @@ class Drive_to:
 
 
 if __name__ == "__main__":
-    x_goal = 0.4  # positive x = forward
-    y_goal = 0  # positive y = left
     drive_to = Drive_to()
     drive_to.drive()

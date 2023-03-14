@@ -1,10 +1,10 @@
 import numpy as np
 
 
-class P:
+class CalcVelocities:
     def __init__(self, update_freq):
-        self.tol_lin = 0.03  # tolerance in meter
-        self.tol_ang = 5 * np.pi / 180
+        self.tol_lin = 0.05  # tolerance in meter
+        self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
         self.max_vel_lin = 0.3
         self.max_vel_ang = 0.8
@@ -18,10 +18,6 @@ class P:
         self.vel_lin = None
         self.x = None
         self.y = None
-
-    def set_goal_coords(self, x_goal, y_goal):
-        self.x_goal = x_goal
-        self.y_goal = y_goal
 
     def calc_vel(self, current_ang, x, y):
         self.current_ang = current_ang
@@ -80,3 +76,7 @@ class P:
             "ang_vel",
             round(self.vel_ang, 2),
         )
+
+    def set_goal_coords(self, x_goal, y_goal):
+        self.x_goal = x_goal
+        self.y_goal = y_goal

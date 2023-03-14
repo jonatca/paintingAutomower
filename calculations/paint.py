@@ -78,25 +78,10 @@ def get_user_input():
         "start": (width - penalty_area_height, width / 2 + penalty_area_width / 2),
         "end": (width, width / 2 + penalty_area_width / 2),
     }
-
+    # for testing, override the user input
+    shortside_right = {"start": (0, 0), "end": (0, 0)}
+    longside_up = {"start": (0, 0), "end": (0, 0)}
+    shortside_left = {"start": (0, 0), "end": (0, 0)}
+    longside_down = {"start": (0, 0), "end": (-0.6, 0)}
     paint_order = [shortside_right, longside_up, shortside_left, longside_down]
-    # lines_json = {
-    #     "shortside_right": shortside_right,
-    #     "longside_up": longside_up,
-    #     "shortside_left": shortside_left,
-    #     "longside_down": longside_down,
-    #     "midline": midline,
-    #     "goal_box_right_1": goal_box_right_1,
-    #     "goal_box_right_2": goal_box_right_2,
-    #     "goal_box_right_3": goal_box_right_3,
-    #     "goal_box_left_1": goal_box_left_1,
-    #     "goal_box_left_2": goal_box_left_2,
-    #     "goal_box_left_3": goal_box_left_3,
-    #     "penalty_area_height_right_1": penalty_area_height_right_1,
-    #     "penalty_area_height_right_2": penalty_area_height_right_2,
-    #     "penalty_area_height_right_3": penalty_area_height_right_3,
-    #     "penalty_area_height_left_1": penalty_area_height_left_1,
-    #     "penalty_area_height_left_2": penalty_area_height_left_2,
-    #     "penalty_area_height_left_3": penalty_area_height_left_3,
-    # }
     return paint_order
