@@ -5,7 +5,7 @@ sys.path.append("/home/kandidatarbete/450/src/calculations")
 import rospy
 import tf.transformations
 import signal
-from geometry_msgs.msg import Twist, PoseStamped
+from geometry_msgs.msg import Twist, PoseStamped, NavSatFix
 import numpy as np
 from calc_velocities import CalcVelocities
 from paint import get_user_input
@@ -29,6 +29,11 @@ class Drive_to:
         sub = rospy.Subscriber("/pose", PoseStamped, self.pose_callback)
         self.rate = rospy.Rate(self.update_freq)
         self.paint_order = get_user_input()
+
+        # self.latitude = None
+        # self.longitude = None
+        # self.altitude = None
+        # rospy.Subscriber("/fix", NavSatFix, self.gps_callback)
 
     def change_coord_sys(
         self, x_goal_prim, y_goal_prim
@@ -61,6 +66,12 @@ class Drive_to:
             round(self.y, 2),
         )
 
+    # def gps_callback(self, fix):
+    #     self.latitude = fix.latitude
+    #     self.longitude = fix.longitude
+    #     self.altitude = fix.altitude
+    #     print(self.latitude, self.longitude, self.altitude, "gps")
+
     def pose_callback(self, pose):
         z_dir = pose.pose.orientation.z
         w_dir = pose.pose.orientation.w
@@ -86,7 +97,7 @@ class Drive_to:
         # if not (ang_vel == 0.0 and lin_vel == 0.0):
         #     self.hasMoved = True
 
-    def change_goal(self):  # TODO contains bug if want to start not in origo
+    def change_goal(self):
         if len(self.paint_order) > 0:
             if "start" in self.paint_order[0]:
                 x_goal_prim, y_goal_prim = self.paint_order[0]["start"]
