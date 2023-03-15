@@ -111,9 +111,9 @@ def get_user_input():
     shortside_left = {"start": (0, 0), "end": (0, 0)}
     longside_down = {"start": (0, 0), "end": (0, 0)}
     corner_arc_right_down = {
-        "start": (0, 0.5),
-        "end": (-0.5, 0),
-        "center": (0, 0),
+        "start": (0, 0),
+        "end": (0, 1),
+        "center": (0, 0.5),
         "radius": 0.5,
         "type": "circle",
     }
