@@ -1,5 +1,6 @@
 import json
 import matplotlib
+import datetime
 
 matplotlib.use(
     "Agg"
@@ -16,9 +17,9 @@ x = data["x"]
 y = data["y"]
 x_goal = data["x_goal"]
 y_goal = data["y_goal"]
-radius = data["radius"]
-x_mid = data["x_mid"]
-y_mid = data["y_mid"]
+radius = data["radius"][0]
+x_mid = data["x_mid"][0]
+y_mid = data["y_mid"][0]
 
 # Plot the data
 plt.plot(x, y, "o-", label="Path")
@@ -33,5 +34,11 @@ plt.ylabel("z")
 plt.title("Path and Goal")
 plt.legend()
 
-# Save the plot to a file instead of displaying it on the screen
-plt.savefig("plot.png")
+# Make axes equal
+plt.axis("equal")
+
+# Get the current timestamp and format it
+timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+# Save the plot to a file with a unique name in the 'plots' folder
+plt.savefig(f"plots/plot-{timestamp}.png")
