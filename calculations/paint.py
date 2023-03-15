@@ -5,6 +5,7 @@ import os
 sys.path.append("/home/kandidatarbete/450/src/userInput")
 current_file = __file__
 parent_dir = os.path.dirname(current_file)
+# grand_parent_dir = os.path.dirname(parent_dir)
 sibling_dir = os.path.join(parent_dir, "userInput")
 child_file = os.path.join(sibling_dir, "paintDimension.json")
 child_file_rel = os.path.relpath(child_file, current_file)
@@ -33,55 +34,88 @@ def get_user_input():
     goal_box_right_1 = {
         "start": (0, width / 2 - goal_box_width / 2),
         "end": (goal_box_height, width / 2 - goal_box_width / 2),
+        "type": "line",
     }
     goal_box_right_2 = {
         "start": (goal_box_height, width / 2 - goal_box_width / 2),
         "end": (goal_box_height, width / 2 + goal_box_width / 2),
+        "type": "line",
     }
     goal_box_right_3 = {
         "start": (goal_box_height, width / 2 + goal_box_width / 2),
         "end": (0, width / 2 + goal_box_width / 2),
+        "type": "line",
     }
     goal_box_left_1 = {
         "start": (width, width / 2 - goal_box_width / 2),
         "end": (width - goal_box_height, width / 2 - goal_box_width / 2),
+        "type": "line",
     }
     goal_box_left_2 = {
         "start": (width - goal_box_height, width / 2 - goal_box_width / 2),
         "end": (width - goal_box_height, width / 2 + goal_box_width / 2),
+        "type": "line",
     }
     goal_box_left_3 = {
         "start": (width - goal_box_height, width / 2 + goal_box_width / 2),
         "end": (width, width / 2 + goal_box_width / 2),
+        "type": "line",
     }
     penalty_area_height_right_1 = {
         "start": (0, width / 2 - penalty_area_width / 2),
         "end": (penalty_area_height, width / 2 - penalty_area_width / 2),
+        "type": "line",
     }
     penalty_area_height_right_2 = {
         "start": (penalty_area_height, width / 2 - penalty_area_width / 2),
         "end": (penalty_area_height, width / 2 + penalty_area_width / 2),
+        "type": "line",
     }
     penalty_area_height_right_3 = {
         "start": (penalty_area_height, width / 2 + penalty_area_width / 2),
         "end": (0, width / 2 + penalty_area_width / 2),
+        "type": "line",
     }
     penalty_area_height_left_1 = {
         "start": (width, width / 2 - penalty_area_width / 2),
         "end": (width - penalty_area_height, width / 2 - penalty_area_width / 2),
+        "type": "line",
     }
     penalty_area_height_left_2 = {
         "start": (width - penalty_area_height, width / 2 - penalty_area_width / 2),
         "end": (width - penalty_area_height, width / 2 + penalty_area_width / 2),
+        "type": "line",
     }
     penalty_area_height_left_3 = {
         "start": (width - penalty_area_height, width / 2 + penalty_area_width / 2),
         "end": (width, width / 2 + penalty_area_width / 2),
+        "type": "line",
+    }
+    center_circle = {
+        "start": (width / 2 - center_circle_diameter / 2, lenght / 2),
+        "end": (width / 2 - center_circle_diameter / 2, lenght / 2),
+        "center": (width / 2, lenght / 2),
+        "radius": center_circle_diameter / 2,
+        "type": "circle",
+    }
+    corner_arc_right_down = {
+        "start": (0, corner_arc_radius),
+        "end": (corner_arc_radius, 0),
+        "center": (0, 0),
+        "radius": corner_arc_radius,
+        "type": "circle",
     }
     # for testing, override the user input
-    shortside_right = {"start": (0, 0), "end": (0, 0)}
-    longside_up = {"start": (0, 0), "end": (0, 0)}
+    # shortside_right = {"start": (1, 0), "end": (-0.5, 0), "type": "line"}
+    longside_up = {"start": (0, 0), "end": (-1, 0)}
     shortside_left = {"start": (0, 0), "end": (0, 0)}
-    longside_down = {"start": (0, 0), "end": (-0.6, 0)}
-    paint_order = [shortside_right, longside_up, shortside_left, longside_down]
+    longside_down = {"start": (0, 0), "end": (0, 0)}
+    corner_arc_right_down = {
+        "start": (0, 0.5),
+        "end": (-0.5, 0),
+        "center": (0, 0),
+        "radius": 0.5,
+        "type": "circle",
+    }
+    paint_order = [corner_arc_right_down]
     return paint_order

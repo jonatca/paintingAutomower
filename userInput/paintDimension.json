@@ -6,7 +6,7 @@
   "goalBoxHeight": "5.5",
   "goalBoxWidth": "18.3",
   "penaltyDotLength": "11",
-  "centerCircleDiameter": "9.15",
+  "centerCircleDiameter": "1.5",
   "cornerArcRadius": "1",
   "penaltyArcRadius": "9.15",
   "numCombLines": "30"
