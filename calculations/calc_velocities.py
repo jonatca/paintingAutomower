@@ -3,7 +3,7 @@ import numpy as np
 
 class CalcVelocities:
     def __init__(self, update_freq):
-        self.tol_lin = 0.05  # tolerance in meter
+        self.tol_lin = 0.03  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
         self.max_vel_lin = 0.3
@@ -40,8 +40,7 @@ class CalcVelocities:
         return theoretical_vel_ang
 
     def _goal_angle_line(self):
-        goal_ang = np.arctan2(self.y_goal - self.y, self.x_goal - self.x)
-        return goal_ang
+        return np.arctan2(self.y_goal - self.y, self.x_goal - self.x)
 
     def _goal_angle_circle(self, x_mid, y_mid, x, y):
         # Calculate the vector from the center of the circle to the robot's position
@@ -76,7 +75,7 @@ class CalcVelocities:
         )  # limits max velocity
         self.error_ang = self.goal_ang - self.current_ang
         self.error_ang = (self.error_ang + np.pi) % (2 * np.pi) - np.pi
-        if self.error_ang < self.min_tol_ang:  # to avoid calculatins error
+        if np.abs(self.error_ang) < self.min_tol_ang:  # to avoid calculatins error
             self.error_ang = 0
         self.vel_ang = self.Kp_a * self.error_ang  # more error => more angular velocity
         self.vel_ang = np.clip(self.vel_ang, -self.max_vel_ang, self.max_vel_ang)
@@ -85,7 +84,7 @@ class CalcVelocities:
             self.vel_ang = 0
         if np.abs(self.error_ang) > self.tol_ang:  # dont move if not facing goal
             self.vel_lin = 0
-        self.log_message()
+        # self.log_message()
         return self.vel_lin, self.vel_ang
 
     def has_reached_goal(self):
