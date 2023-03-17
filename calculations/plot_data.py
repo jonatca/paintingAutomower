@@ -37,3 +37,6 @@ def plot_data():
     plt.savefig(f"plots/plot-{timestamp}.png")
     plt.savefig(f"plots/plot-latest.png")
     print(f"Saved plot to plots/plot-{timestamp}.png")
+
+if __name__ == "__main__":
+    plot_data()
