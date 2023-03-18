@@ -17,4 +17,11 @@ To start control mower:
 6. Open a secound terminal and run this anywhere in terminal: source ~/450/devel/setup.bash
 7. run this anywhere in terminal: rosrun am_driver main.py (If error, run this in 450/src/hrp/am_driver/scripts: chmod 777 hrp_teleop.py)
 
+To run simulation:
+1. change paint_order in paint.py to desierd trip
+2. run simulate.py
+3. check you simulated result in calculations/plots/plot-latest.png
+
+
 To get position run this in terminal at 450/src/hrp/am_driver_scripts: rostopic echo /pose
+To get GPS run this in terminal at 450/src/hrp/am_driver_scripts: rostopic echo /figGPS
