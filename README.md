@@ -19,10 +19,10 @@ To run simulation:
 1. Change trip to paint or comb
 - Paint:
     - 1 Change paint_order in paint.py to desierd trip
-    - 2 Change self.order to paint_order in simulate.py
+    - 2 Change self.order = paint_order in simulate.py
 - Comb and cut
     - 1 Change comb_order in comb_cut.py to desierd trip
-    - 2 Change self.order to comb_cut_order in simulate.py
+    - 2 Change self.order = comb_cut_order in simulate.py
 2. Run simulate.py from /calculations (first run "cd calculations")
 3. Check you simulated result in calculations/plots/plot-latest.png
 

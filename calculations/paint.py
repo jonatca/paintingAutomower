@@ -12,7 +12,7 @@ child_file_rel = os.path.relpath(child_file, current_file)
 
 
 # This file can only be exceuted from the calculations directory or by rosrun am_driver main.py
-def get_user_input():
+def get_paint_order():
     with open(child_file_rel) as paintDimensions:
         user_input = json.load(paintDimensions)
     width = round(float(user_input["shortside"]), 4)
@@ -155,4 +155,12 @@ def get_user_input():
         corner_arc_left_down,
         corner_arc_left_up,
     ]
+    corner_arc_left_down = {
+        "start": (0, 0),
+        "end": (2, 0),
+        "center": (1, 0),
+        "radius": 1,
+        "type": "circle",
+    }
+    # paint_order = [corner_arc_left_down]
     return paint_order
