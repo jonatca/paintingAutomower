@@ -22,14 +22,14 @@ def cost_function(params_array):
 
 
 # Set the bounds for the PID parameters (Kp, Ki, Kd, Kp90)
-lower_bounds = [15, -1, 5, 4]
-upper_bounds = [40, 1, 24, 16]
+lower_bounds = [60, 4, 7, 15]
+upper_bounds = [500, 9, 14, 23]
 options = {"c1": 0.5, "c2": 0.3, "w": 0.9}
 optimizer = ps.single.GlobalBestPSO(
     n_particles=30, dimensions=4, options=options, bounds=(lower_bounds, upper_bounds)
 )
 # Perform optimization
-cost, pos = optimizer.optimize(cost_function, iters=100)
+cost, pos = optimizer.optimize(cost_function, iters=1000)
 print("Optimized Kp:", pos[0], "Optimized Ki:", pos[1], "Optimized Kd:", pos[2], "Optimized Kp90:", pos[3])
 pid = CalcVelocities(Kp_circle=pos[0], Ki_circle=pos[1], Kd_circle=pos[2], Kp90_circle=pos[3])
 sim = Simulate(pid=pid)

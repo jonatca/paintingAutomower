@@ -8,7 +8,7 @@ from plot_data import plot_data
 
 class Simulate:
     def __init__(self, pid=None):
-        self.max_time = 150000 
+        self.max_time = 150 
         paint_order = get_paint_order()
         comb_cut_order = get_comb_cut_order()
         self.order = paint_order
@@ -115,7 +115,7 @@ class Simulate:
                 self.data["y_mid"].append(self.y_mid)
             # print("changed goal to", self.x_goal, self.y_goal)
             self.pid.set_goal_coords(self.x_goal, self.y_goal)
-            print("The process has ", round(len(self.order) / self.tot_num_lines * 100, 1), "procent left")
+            # print("The process has ", round(len(self.order) / self.tot_num_lines * 100, 1), "procent left")
         else:
             self.reached_goal = True
 
