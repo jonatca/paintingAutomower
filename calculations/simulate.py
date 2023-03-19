@@ -7,11 +7,13 @@ from plot_data import plot_data
 
 
 class Simulate:
-    def __init__(self):
+    def __init__(self, pid=None):
         paint_order = get_paint_order()
         comb_cut_order = get_comb_cut_order()
         self.order = paint_order
-        self.update_freq = 10.0  # Hz but doesn't work? stuck at 10 Hz
+        self.max_time = 150 
+        self.update_freq = 10  # Hz but doesn't work? stuck at 10 Hz
+
         self.data = {
             "x": [],
             "y": [],
@@ -23,21 +25,33 @@ class Simulate:
         }
         self.x = 0
         self.y = 0
+        self.x_goal = None
+        self.y_goal = None
         self.current_ang = 0
         self.len_vel = 0
         self.ang_vel = 0
         self.radius = None
         self.drive_in_circle = False
         self.reached_goal = False
-        self.pid = CalcVelocities(self.update_freq)
+        if pid is None:
+            self.pid = CalcVelocities() #TODO add update freq
+        else:
+            self.pid = pid
         self.change_goal()
         self.dt = 1 / self.update_freq
         self.time_elapsed = 0
-        self.max_time = 4000
 
-    def drive(self):
+    def get_square_error(self):
+        if self.time_elapsed >= self.max_time - 10: # if the robot did not reach the goal
+            return 99999999 
+        return self.pid.square_error_radius**2 * self.time_elapsed**(0.5) * self.pid.times_above_tol_ang ** (1.8)
+        
+
+    def drive(self, save_data=False):
         while not self.reached_goal and self.time_elapsed < self.max_time:
             # calculates new x and y position based on the last velocities and last position
+            position_noise = np.random.normal(loc=0, scale=0.01, size=(2,))
+            velocity_noise = np.random.normal(loc=0, scale=0.1, size=(2,))
             self.x += self.len_vel * np.cos(self.current_ang) * self.dt
             self.y += self.len_vel * np.sin(self.current_ang) * self.dt
             self.current_ang += self.ang_vel * self.dt
@@ -49,14 +63,20 @@ class Simulate:
             if self.len_vel == 0 and self.ang_vel == 0:
                 self.change_goal()
             self.time_elapsed += self.dt
-        self.stop()
+        if save_data:
+            self.stop()
+
 
     def stop(self):
-        print("Stopping")
+        # print("Stopping")
         print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
+        print("the sqaure error was", round(self.get_square_error(), 4))
+        print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
+        print("sqare error radius was", round(self.pid.square_error_radius, 4))
         with open("data.json", "w") as json_file:
             json.dump(self.data, json_file)
         plot_data()
+        pass
 
     ##if ctrl+c is pressed, run self.stop()
     def ctrlc_shutdown(self, signum, frame):
@@ -67,15 +87,12 @@ class Simulate:
     def change_goal(self):
         if len(self.order) > 0:
             if "start" in self.order[0]:
-                print(self.order[0])
+                # print(self.order[0])
                 self.x_goal, self.y_goal = self.order[0]["start"]
                 self.order[0].pop("start")
             elif "end" in self.order[0]:
-                print("end")
                 self.drive_in_circle = False
-                print(self.order[0])
                 if self.order[0]["type"] == "circle":  # start to go in circle
-                    print("start to go in circle")
                     self.radius = self.order[0]["radius"]
                     self.x_mid, self.y_mid = self.order[0]["center"]
                     self.drive_in_circle = True
@@ -92,7 +109,7 @@ class Simulate:
                 self.data["radius"].append(self.radius)
                 self.data["x_mid"].append(self.x_mid)
                 self.data["y_mid"].append(self.y_mid)
-            print("changed goal to", self.x_goal, self.y_goal)
+            # print("changed goal to", self.x_goal, self.y_goal)
             self.pid.set_goal_coords(self.x_goal, self.y_goal)
         else:
             self.reached_goal = True
@@ -100,4 +117,4 @@ class Simulate:
 
 if __name__ == "__main__":
     sim = Simulate()
-    sim.drive()
+    sim.drive(True)

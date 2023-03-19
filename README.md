@@ -23,9 +23,8 @@ To run simulation:
 - Comb and cut
     - 1 Change comb_order in comb_cut.py to desierd trip
     - 2 Change self.order = comb_cut_order in simulate.py
-2. Run simulate.py from /calculations (first run "cd calculations")
+2. Run "cd calculations", then run "python3 simulate.py"
 3. Check you simulated result in calculations/plots/plot-latest.png
-
 
 To get position run this in terminal at 450/src/hrp/am_driver_scripts: rostopic echo /pose
 To get GPS run this in terminal at 450/src/hrp/am_driver_scripts: rostopic echo /figGPS

@@ -17,8 +17,6 @@ def get_paint_order():
         user_input = json.load(paintDimensions)
     width = round(float(user_input["shortside"]), 4)
     lenght = round(float(user_input["longside"]), 4)
-    print("width: ", width)
-    print("lenght: ", lenght)
     penalty_area_width = round(float(user_input["penaltyAreaWidth"]), 4)
     penalty_area_height = round(float(user_input["penaltyAreaHeight"]), 4)
     goal_box_height = round(float(user_input["goalBoxHeight"]), 4)
@@ -157,10 +155,10 @@ def get_paint_order():
     ]
     corner_arc_left_down = {
         "start": (0, 0),
-        "end": (2, 0),
-        "center": (1, 0),
-        "radius": 1,
+        "end": (10, 0),
+        "center": (5, 0),
+        "radius": 5,
         "type": "circle",
     }
-    # paint_order = [corner_arc_left_down]
+    paint_order = [corner_arc_left_down]
     return paint_order

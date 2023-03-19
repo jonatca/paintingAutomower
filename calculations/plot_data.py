@@ -21,12 +21,12 @@ def plot_data():
         x_mid = data["x_mid"][0]
         y_mid = data["y_mid"][0]
         # Add the optimal circle
-        circle = Circle((x_mid, y_mid), radius, edgecolor="blue", facecolor="none")
+        circle = Circle((x_mid, y_mid), radius, edgecolor="red", facecolor="none")
         plt.gca().add_patch(circle)
     except:
         pass
-    plt.plot(x, y, "o-", label="Path")
-    plt.plot(x_goal, y_goal, "rx", markersize=10, label="Goal")
+    plt.plot(x, y, "o-", label="Path", markersize=1)
+    plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
 
     plt.xlabel("x")
     plt.ylabel("y")
