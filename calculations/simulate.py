@@ -8,10 +8,11 @@ from plot_data import plot_data
 
 class Simulate:
     def __init__(self, pid=None):
+        self.max_time = 150000 
         paint_order = get_paint_order()
         comb_cut_order = get_comb_cut_order()
         self.order = paint_order
-        self.max_time = 150 
+        self.tot_num_lines = len(self.order)
         self.update_freq = 10  # Hz but doesn't work? stuck at 10 Hz
 
         self.data = {
@@ -44,17 +45,20 @@ class Simulate:
     def get_square_error(self):
         if self.time_elapsed >= self.max_time - 10: # if the robot did not reach the goal
             return 99999999 
-        return self.pid.square_error_radius**2 * self.time_elapsed**(0.5) * self.pid.times_above_tol_ang ** (1.8)
+        return self.pid.square_error_radius**2 * self.time_elapsed**(0.3) * (self.pid.times_above_tol_ang + 1) ** (1.8)
         
 
     def drive(self, save_data=False):
         while not self.reached_goal and self.time_elapsed < self.max_time:
             # calculates new x and y position based on the last velocities and last position
-            position_noise = np.random.normal(loc=0, scale=0.01, size=(2,))
-            velocity_noise = np.random.normal(loc=0, scale=0.1, size=(2,))
-            self.x += self.len_vel * np.cos(self.current_ang) * self.dt
-            self.y += self.len_vel * np.sin(self.current_ang) * self.dt
-            self.current_ang += self.ang_vel * self.dt
+            position_noise = np.random.normal(loc=0, scale=0.002, size=(2,))
+            vel_noise_lin = np.random.normal(loc=0, scale=0.001, size=(1,))
+            vel_noise_ang = np.random.normal(loc=0, scale=0.002, size=(1,))
+            # print(velocity_noise)
+            # print(position_noise)
+            self.x += (self.len_vel + vel_noise_lin[0]) * np.cos(self.current_ang) * self.dt + position_noise[0]
+            self.y += (self.len_vel + vel_noise_lin[0])* np.sin(self.current_ang) * self.dt + position_noise[1]
+            self.current_ang += (self.ang_vel + vel_noise_ang[0]) * self.dt
             self.len_vel, self.ang_vel = self.pid.calc_vel(
                 self.current_ang, self.x, self.y
             )
@@ -111,6 +115,7 @@ class Simulate:
                 self.data["y_mid"].append(self.y_mid)
             # print("changed goal to", self.x_goal, self.y_goal)
             self.pid.set_goal_coords(self.x_goal, self.y_goal)
+            print("The process has ", round(len(self.order) / self.tot_num_lines * 100, 1), "procent left")
         else:
             self.reached_goal = True
 

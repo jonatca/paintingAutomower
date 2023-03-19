@@ -22,8 +22,8 @@ def cost_function(params_array):
 
 
 # Set the bounds for the PID parameters (Kp, Ki, Kd, Kp90)
-lower_bounds = [800, 10, 100, 10]
-upper_bounds = [2000, 50, 200, 70]
+lower_bounds = [15, -1, 5, 4]
+upper_bounds = [40, 1, 24, 16]
 options = {"c1": 0.5, "c2": 0.3, "w": 0.9}
 optimizer = ps.single.GlobalBestPSO(
     n_particles=30, dimensions=4, options=options, bounds=(lower_bounds, upper_bounds)

@@ -2,7 +2,7 @@ import numpy as np
 
 
 class CalcVelocities:
-    def __init__(self, Kp_circle= 1988.630967970298, Ki_circle=45.649322194873406, Kd_circle=144.1921065965120, Kp90_circle=68.30720201188953): 
+    def __init__(self, Kp_circle=27.24735258773113 , Ki_circle=0.9436274560501285, Kd_circle=15.6704968395617, Kp90_circle=13.892311124153935): 
         self.tol_lin = 0.1  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
@@ -41,6 +41,7 @@ class CalcVelocities:
         self.theoretical_vel_ang = self._circle_vel_ang()
         self.paint_circle = True
         self.max_vel_lin = 0.2
+        # self.tol_ang = 7 * np.pi/180
 
     def calc_vel(self, current_ang, x, y):
         self.current_ang = self._normalize_angle(current_ang)

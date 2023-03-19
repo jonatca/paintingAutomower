@@ -35,9 +35,9 @@ def plot_data():
     plt.axis("equal")
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     timestamp = int(timestamp.replace("-", ""))
-    plt.savefig("plots/plot-%d.png" % timestamp)
     plt.savefig("plots/plot-latest.png")
-    print("Saved plot to plots/plot-", {timestamp}, ".png")
+    # plt.savefig("plots/plot-%d.png" % timestamp)
+    # print("Saved plot to plots/plot-", {timestamp}, ".png")
 
 
 if __name__ == "__main__":

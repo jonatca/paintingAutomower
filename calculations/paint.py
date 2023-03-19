@@ -153,12 +153,12 @@ def get_paint_order():
         corner_arc_left_down,
         corner_arc_left_up,
     ]
-    corner_arc_left_down = {
-        "start": (0, 0),
-        "end": (10, 0),
-        "center": (5, 0),
-        "radius": 5,
-        "type": "circle",
-    }
-    paint_order = [corner_arc_left_down]
+    # corner_arc_left_down = {
+    #     "start": (0, 0),
+    #     "end": (10, 0),
+    #     "center": (5, 0),
+    #     "radius": 5,
+    #     "type": "circle",
+    # }
+    # paint_order = [corner_arc_left_down]
     return paint_order
