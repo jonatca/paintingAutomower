@@ -51,11 +51,9 @@ class Simulate:
     def drive(self, save_data=False):
         while not self.reached_goal and self.time_elapsed < self.max_time:
             # calculates new x and y position based on the last velocities and last position
-            position_noise = np.random.normal(loc=0, scale=0.002, size=(2,))
+            position_noise = np.random.normal(loc=0, scale=0.004, size=(2,))
             vel_noise_lin = np.random.normal(loc=0, scale=0.001, size=(1,))
             vel_noise_ang = np.random.normal(loc=0, scale=0.002, size=(1,))
-            # print(velocity_noise)
-            # print(position_noise)
             self.x += (self.len_vel + vel_noise_lin[0]) * np.cos(self.current_ang) * self.dt + position_noise[0]
             self.y += (self.len_vel + vel_noise_lin[0])* np.sin(self.current_ang) * self.dt + position_noise[1]
             self.current_ang += (self.ang_vel + vel_noise_ang[0]) * self.dt
@@ -67,12 +65,12 @@ class Simulate:
             if self.len_vel == 0 and self.ang_vel == 0:
                 self.change_goal()
             self.time_elapsed += self.dt
+            # self.stop()
         if save_data:
             self.stop()
 
 
     def stop(self):
-        # print("Stopping")
         print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
         print("the sqaure error was", round(self.get_square_error(), 4))
         print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
@@ -86,11 +84,10 @@ class Simulate:
     def ctrlc_shutdown(self, signum, frame):
         self.stop()
         print("Shutting down")
-        raise KeyboardInterrupt
 
     def change_goal(self):
         if len(self.order) > 0:
-            if "start" in self.order[0]:
+            if "start" in self.order[0]: #TODO remove this if statement
                 # print(self.order[0])
                 self.x_goal, self.y_goal = self.order[0]["start"]
                 self.order[0].pop("start")

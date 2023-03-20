@@ -2,7 +2,7 @@ import numpy as np
 
 
 class CalcVelocities:
-    def __init__(self, Kp_circle=200.0854645473157, Ki_circle=6.8537205326041, Kd_circle=10.41866188655, Kp90_circle=20.57111099044): 
+    def __init__(self, Kp_circle=206.5510399, Ki_circle=18.7532926, Kd_circle=14.2643917, Kp90_circle=45.9726824): 
         self.tol_lin = 0.05  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
@@ -69,12 +69,14 @@ class CalcVelocities:
 
             # Update the linear and angular velocities using the PID controller
             self.vel_lin = self.max_vel_lin
-            self.vel_ang = -(
-                self.Kp90_circle * self.error_ang * self.dt
-                + self.Kp_circle * self.error_radius * self.dt
-                + self.Ki_circle * self.error_radius_sum
-                + self.Kd_circle * self.error_radius_deriv
-            ) / self.radius #normalize to radius
+            if np.abs(self.error_ang) < self.tol_ang:
+                self.vel_ang = -(
+                    self.Kp_circle * self.error_radius * self.dt
+                    + self.Ki_circle * self.error_radius_sum
+                    + self.Kd_circle * self.error_radius_deriv
+                ) / self.radius #normalize to radius
+            else:
+                self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt/self.radius
         else:
             self.goal_ang = self._goal_angle_line()
             self.error_ang = self.goal_ang - self.current_ang
