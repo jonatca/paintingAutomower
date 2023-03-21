@@ -6,11 +6,13 @@ import rospy
 import tf.transformations
 import signal
 import json
-from geometry_msgs.msg import Twist, PoseStamped  # , NavSatFix
+from geometry_msgs.msg import Twist, PoseStamped
+from sensor_msgs.msg import NavSatFix
+# from gps_common.msg import NavSatFix
 import numpy as np
 from calc_velocities import CalcVelocities
 from paint import get_paint_order
-
+from plot_data import plot_data
 
 class Drive_to:
     def __init__(self, reset_angle=True):
@@ -24,6 +26,8 @@ class Drive_to:
             "x_mid": [],
             "y_mid": [],
             "radius": [],
+            "x_gps": [],
+            "y_gps": [],
         }
         self.x = None 
         self.y = None
@@ -34,15 +38,32 @@ class Drive_to:
         self.drive_in_circle = False
         self.reset_angle = reset_angle
         self.twist = Twist()
+        self.lat_start = None
+        self.lon_start = None
 
         self.pid = None  
         self.reached_goal = False
         rospy.init_node("move_forward")
         self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
         sub = rospy.Subscriber("/pose", PoseStamped, self.pose_callback)
+        self.gps_sub = rospy.Subscriber("/GPSfix", NavSatFix, self.gps_callback)
         self.rate = rospy.Rate(self.update_freq) 
         self.paint_order = get_paint_order()
+    
+    def gps_callback(self, fix):
+        if self.lat_start is None and self.lon_start is None:
+            self.lat_start = fix.latitude
+            self.lon_start = fix.longitude
+        x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
+        self.data["x_gps"].append(x_gps)
+        self.data["y_gps"].append(y_gps)
+        print(fix.latitude, fix.longitude, "gps")
+        print(x_gps, y_gps, "gps, converted to xy")
 
+    def convert_to_xy(self, lat, lon, lat_start, lon_start):
+        x = (lat - lat_start) * 111139
+        y = (lon - lon_start) * 111139
+        return x, y 
     def change_coord_sys(
         self, x_goal_prim, y_goal_prim
     ):  # automowers relative coordinates => global coordinates
@@ -74,7 +95,7 @@ class Drive_to:
         if self.store_data:  
             with open("data.json", "w") as json_file:
                 json.dump(self.data, json_file)
-
+            plot_data()
         rospy.loginfo(
             "Automower has moved to position x=%s, y=%s",
             round(self.x, 2),
