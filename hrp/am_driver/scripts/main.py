@@ -9,7 +9,7 @@ import json
 from geometry_msgs.msg import Twist, PoseStamped  # , NavSatFix
 import numpy as np
 from calc_velocities import CalcVelocities
-from paint import get_user_input
+from paint import get_paint_order
 
 
 class Drive_to:
@@ -41,7 +41,7 @@ class Drive_to:
         self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
         sub = rospy.Subscriber("/pose", PoseStamped, self.pose_callback)
         self.rate = rospy.Rate(self.update_freq) 
-        self.paint_order = get_user_input()
+        self.paint_order = get_paint_order()
 
     def change_coord_sys(
         self, x_goal_prim, y_goal_prim
