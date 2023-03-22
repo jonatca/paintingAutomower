@@ -157,16 +157,26 @@ def get_paint_order():
         "end": (1, 0),
         "type": "line",
     }
-    circle = {
+    line1 = {
         "start": (1,0),
-        "end": (1,2),
-        "center": (1,1),
+        "end": (2,0),
+        "type": "line",
+    }
+    circle = {
+        "start": (2,0),
+        "end": (1,-1),
+        "center": (2,-1),
         "radius": 1,
         "type": "circle",
     }   
+    line2 = {
+        "start": (1,-1),
+        "end": (1,0),
+        "type": "line",
+    }
 
     
-    paint_order = [longside_down, circle]
+    paint_order = [line1, circle, line2]
     print("paint_order", paint_order)
     return paint_order
 def turn270(x, y):
