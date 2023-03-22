@@ -150,6 +150,9 @@ class Drive_to:
                 x_goal_prim, y_goal_prim = self.paint_order[0]["end"]
                 self.paint_order[0].pop("end")  # unnecessary
                 self.paint_order.pop(0)  # removes the line from the list
+            elif "after_end" in self.paint_order[0]:
+                self.paint_order[0] = self.paint_order[0]["after_end"]
+                self.change_goal()
             else:
                 self.reached_goal = True
                 raise ValueError("Invalid line")
