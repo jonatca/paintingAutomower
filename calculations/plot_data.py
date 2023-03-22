@@ -20,8 +20,8 @@ def plot_data():
     x_goal = data["x_goal"]
     y_goal = data["y_goal"]
 
-    # x_gps = data["x_gps"]
-    # y_gps = data["x_gps"]
+    x_gps = data["x_gps"]
+    y_gps = data["x_gps"]
     try:
         radius = data["radius"][0]
         x_mid = data["x_mid"][0]
@@ -33,7 +33,7 @@ def plot_data():
         pass
     plt.plot(x, y, "o-", label="Path Ordometri", markersize=1)
     plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
-    # plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
+    plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
 
     plt.xlabel("x")
     plt.ylabel("y")
