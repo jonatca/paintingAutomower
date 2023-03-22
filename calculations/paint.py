@@ -135,24 +135,22 @@ def get_paint_order():
         shortside_left,
         longside_down,
         shortside_right,
-        midline,
-        goal_box_right_1,
-        goal_box_right_2,
-        goal_box_right_3,
-        goal_box_left_1,
-        goal_box_left_2,
-        goal_box_left_3,
-        penalty_area_right_1,
-        penalty_area_right_2,
-        penalty_area_right_3,
-        penalty_area_left_1,
-        penalty_area_left_2,
-        penalty_area_left_3,
-        center_circle,
-        corner_arc_right_down,
-        corner_arc_right_up,
-        corner_arc_left_down,
-        corner_arc_left_up,
+        #midline,
+        #goal_box_right_2,
+        #goal_box_right_3,
+        #goal_box_left_1,
+        #goal_box_left_2,
+        #goal_box_left_3,
+        #penalty_area_right_1,
+       # penalty_area_right_2,
+        #penalty_area_right_3,
+       # penalty_area_left_1,
+       # penalty_area_left_2,
+       # penalty_area_left_3,
+       # center_circle,
+       # corner_arc_right_up,
+       # corner_arc_left_down,
+       # corner_arc_left_up,
     ]
     corner_arc_left_down = {
         "start": (0, 0),
@@ -161,7 +159,7 @@ def get_paint_order():
         "radius": 1,
         "type": "circle",
     }
-    paint_order = [corner_arc_left_down]
+    #paint_order = [corner_arc_left_down]
     return paint_order
 
 # def get_turn(turn_dir, radius):
