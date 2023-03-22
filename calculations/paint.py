@@ -152,16 +152,33 @@ def get_paint_order():
        # corner_arc_left_down,
        # corner_arc_left_up,
     ]
-    corner_arc_left_down = {
+    longside_down = {
         "start": (0, 0),
-        "end": (-1, 1),
-        "center": (0, 1),
-        "radius": 1,
-        "type": "circle",
+        "end": (1, 0),
+        "type": "line",
+        "after_end": turn270(1,0) 
     }
-    #paint_order = [corner_arc_left_down]
-    return paint_order
 
+    paint_order = [longside_down]
+    return paint_order
+def turn270(x, y):
+    return  [{
+        "start": (x, y),
+        "end": (x+3, y+3),
+        "type": "line",
+    },
+    {
+        "start": (x+3, y+3),
+        "end": (x+3,y-3),
+        "center": (x+3,y),
+        "radius": 3,
+        "type": "circle",
+        },
+        {
+        "start": (x+3,y-3),
+        "end":(x,y),
+        "type": "line"
+        },]
 # def get_turn(turn_dir, radius):
 #     if turn_dir == "right":
 #     right_turn = [{

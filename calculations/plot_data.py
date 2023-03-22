@@ -9,7 +9,7 @@ from matplotlib.patches import Circle
 
 
 
-def plot_data():
+def plot_data(GPS=True):
     matplotlib.use(
         "Agg"
     )  # Set the backend to Agg (non-interactive) to avoid display errors
@@ -19,9 +19,9 @@ def plot_data():
     y = data["y"]
     x_goal = data["x_goal"]
     y_goal = data["y_goal"]
-
-    x_gps = data["x_gps"]
-    y_gps = data["x_gps"]
+    if GPS:
+        x_gps = data["x_gps"]
+        y_gps = data["x_gps"]
     try:
         radius = data["radius"][0]
         x_mid = data["x_mid"][0]
@@ -33,7 +33,8 @@ def plot_data():
         pass
     plt.plot(x, y, "o-", label="Path Ordometri", markersize=1)
     plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
-    plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
+    if GPS:
+        plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
 
     plt.xlabel("x")
     plt.ylabel("y")

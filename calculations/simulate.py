@@ -51,9 +51,9 @@ class Simulate:
     def drive(self, save_data=False):
         while not self.reached_goal and self.time_elapsed < self.max_time:
             # calculates new x and y position based on the last velocities and last position
-            position_noise = np.random.normal(loc=0, scale=0.004, size=(2,))
-            vel_noise_lin = np.random.normal(loc=0, scale=0.001, size=(1,))
-            vel_noise_ang = np.random.normal(loc=0, scale=0.002, size=(1,))
+            position_noise = np.random.normal(loc=0, scale=0.000, size=(2,))
+            vel_noise_lin = np.random.normal(loc=0, scale=0.000, size=(1,))
+            vel_noise_ang = np.random.normal(loc=0, scale=0.000, size=(1,))
             self.x += (self.len_vel + vel_noise_lin[0]) * np.cos(self.current_ang) * self.dt + position_noise[0]
             self.y += (self.len_vel + vel_noise_lin[0])* np.sin(self.current_ang) * self.dt + position_noise[1]
             self.current_ang += (self.ang_vel + vel_noise_ang[0]) * self.dt
@@ -77,14 +77,14 @@ class Simulate:
         print("sqare error radius was", round(self.pid.square_error_radius, 4))
         with open("data.json", "w") as json_file:
             json.dump(self.data, json_file)
-        plot_data()
+        plot_data(False)
         pass
 
     ##if ctrl+c is pressed, run self.stop()
     def ctrlc_shutdown(self, signum, frame):
         self.stop()
         print("Shutting down")
-
+   
     def change_goal(self):
         if len(self.order) > 0:
             if "start" in self.order[0]: #TODO remove this if statement
@@ -100,7 +100,17 @@ class Simulate:
                     self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid)
                 self.x_goal, self.y_goal = self.order[0]["end"]
                 self.order[0].pop("end")  # unnecessary
-                self.order.pop(0)  # removes the line from the list
+                if "after_end" not in self.order[0]:
+                    self.order.pop(0)  # removes the line from the list
+            elif "after_end" in self.order[0]:
+                i = 0
+                while len(self.order[i]["after_end"]) > 0:
+                    print("order[i]", self.order[i]["after_end"])
+                    go_to_line = self.order[i]["after_end"].pop(0)
+                    self.order.insert(0, go_to_line) 
+                    i += 1
+                self.change_goal()
+                self.order.pop(i)
             else:
                 self.reached_goal = True
                 raise ValueError("Invalid line")
