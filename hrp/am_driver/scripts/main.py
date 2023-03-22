@@ -133,6 +133,7 @@ class Drive_to:
     def change_goal(self):
         if len(self.paint_order) > 0:
             if "start" in self.paint_order[0]:
+                self.pid.not_in_circle()
                 x_goal_prim, y_goal_prim = self.paint_order[0]["start"]
                 self.paint_order[0].pop("start")
             elif "end" in self.paint_order[0]:
@@ -149,11 +150,17 @@ class Drive_to:
                     self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid)
                 x_goal_prim, y_goal_prim = self.paint_order[0]["end"]
                 self.paint_order[0].pop("end")  # unnecessary
-                self.paint_order.pop(0)  # removes the line from the list
             elif "after_end" in self.paint_order[0]:
-                self.paint_order[0] = self.paint_order[0]["after_end"]
+                i = 0
+                while len(self.paint_order[i]["after_end"]) > 0:
+                    print("paint_order[i]", self.paint_order[i]["after_end"])
+                    go_to_line = self.paint_order[i]["after_end"].pop(0)
+                    self.paint_order.insert(0, go_to_line) 
+                    i += 1
                 self.change_goal()
+                self.paint_order.pop(i)
             else:
+                self.paint_order.pop(0)
                 self.reached_goal = True
                 raise ValueError("Invalid line")
             x_goal, y_goal = self.change_coord_sys(x_goal_prim, y_goal_prim)

@@ -3,7 +3,7 @@ import numpy as np
 
 class CalcVelocities:
     def __init__(self, Kp_circle=366.94510324142476, Kp90_circle=85.967317866): 
-        self.tol_lin = 0.1  # tolerance in meter
+        self.tol_lin = 0.3  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
         self.max_vel_lin = 0.3
@@ -42,7 +42,14 @@ class CalcVelocities:
         self.paint_circle = True
         self.max_vel_lin = 0.2
         # self.tol_ang = 7 * np.pi/180
-
+    def not_in_circle(self):
+        self.radius = None
+        self.x_mid = None
+        self.y_mid = None
+        self.paint_circle = False
+        self.max_vel_lin = 0.3
+        self.tol_ang = 7 * np.pi/180
+    
     def calc_vel(self, current_ang, x, y):
         self.current_ang = self._normalize_angle(current_ang)
         self.x = x
@@ -89,6 +96,7 @@ class CalcVelocities:
         self.vel_lin = np.clip(self.vel_lin, -self.max_vel_lin, self.max_vel_lin)
         self.vel_ang = np.clip(self.vel_ang, -self.max_vel_ang, self.max_vel_ang)
         if self._has_reached_goal():
+            print("Goal reached")
             self.vel_lin = 0
             self.vel_ang = 0
         # self._log_message()

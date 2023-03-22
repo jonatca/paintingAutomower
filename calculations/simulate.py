@@ -8,7 +8,7 @@ from plot_data import plot_data
 
 class Simulate:
     def __init__(self, pid=None):
-        self.max_time = 150 
+        self.max_time = 1500
         paint_order = get_paint_order()
         comb_cut_order = get_comb_cut_order()
         self.order = paint_order
@@ -49,6 +49,7 @@ class Simulate:
         
 
     def drive(self, save_data=False):
+        i = 0
         while not self.reached_goal and self.time_elapsed < self.max_time:
             # calculates new x and y position based on the last velocities and last position
             position_noise = np.random.normal(loc=0, scale=0.000, size=(2,))
@@ -65,16 +66,23 @@ class Simulate:
             if self.len_vel == 0 and self.ang_vel == 0:
                 self.change_goal()
             self.time_elapsed += self.dt
-            # self.stop()
+            if i % 5== 0:
+                self.stop()
+            i+=1
         if save_data:
             self.stop()
 
 
     def stop(self):
-        print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
-        print("the sqaure error was", round(self.get_square_error(), 4))
-        print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
-        print("sqare error radius was", round(self.pid.square_error_radius, 4))
+        # print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
+        # print("the sqaure error was", round(self.get_square_error(), 4))
+        # print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
+        # print("sqare error radius was", round(self.pid.square_error_radius, 4))
+        # print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
+        # print("the sqaure error was", round(self.get_square_error(), 4))
+        # print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
+        # print("sqare error radius was", round(self.pid.square_error_radius, 4))
+        print("position", self.x, self.y)
         with open("data.json", "w") as json_file:
             json.dump(self.data, json_file)
         plot_data(False)
@@ -86,9 +94,10 @@ class Simulate:
         print("Shutting down")
    
     def change_goal(self):
+        print(self.order, "order")
         if len(self.order) > 0:
             if "start" in self.order[0]: #TODO remove this if statement
-                # print(self.order[0])
+                self.pid.not_in_circle()
                 self.x_goal, self.y_goal = self.order[0]["start"]
                 self.order[0].pop("start")
             elif "end" in self.order[0]:
@@ -98,10 +107,10 @@ class Simulate:
                     self.x_mid, self.y_mid = self.order[0]["center"]
                     self.drive_in_circle = True
                     self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid)
+                
                 self.x_goal, self.y_goal = self.order[0]["end"]
                 self.order[0].pop("end")  # unnecessary
-                if "after_end" not in self.order[0]:
-                    self.order.pop(0)  # removes the line from the list
+                self.order.pop(0)
             # elif "after_end" in self.order[0]:
             #     i = 0
             #     while len(self.order[i]["after_end"]) > 0:
@@ -111,8 +120,8 @@ class Simulate:
             #         i += 1
             #     self.order.pop(i)
             #     self.change_goal()
-            else:
-                self.order.pop(0)
+            # else:
+            #     self.order.pop(0)
             self.data["x_goal"].append(self.x_goal)
             self.data["y_goal"].append(self.y_goal)
             if self.drive_in_circle:
@@ -120,6 +129,7 @@ class Simulate:
                 self.data["x_mid"].append(self.x_mid)
                 self.data["y_mid"].append(self.y_mid)
             # print("changed goal to", self.x_goal, self.y_goal)
+            print("changed goal to", self.x_goal, self.y_goal)
             self.pid.set_goal_coords(self.x_goal, self.y_goal)
             # print("The process has ", round(len(self.order) / self.tot_num_lines * 100, 1), "procent left")
         else:
