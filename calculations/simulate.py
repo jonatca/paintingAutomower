@@ -112,8 +112,7 @@ class Simulate:
                 self.order.pop(i)
                 self.change_goal()
             else:
-                self.reached_goal = True
-                raise ValueError("Invalid line")
+                self.order.pop(0)
             self.data["x_goal"].append(self.x_goal)
             self.data["y_goal"].append(self.y_goal)
             if self.drive_in_circle:
