@@ -154,14 +154,7 @@ def get_paint_order():
         corner_arc_left_down,
         corner_arc_left_up,
     ]
-    corner_arc_left_down = {
-        "start": (0, 0),
-        "end": (-1, 1),
-        "center": (0, 1),
-        "radius": 1,
-        "type": "circle",
-    }
-    paint_order = [corner_arc_left_down]
+    
     return paint_order
 
 # def get_turn(turn_dir, radius):
