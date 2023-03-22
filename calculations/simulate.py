@@ -109,8 +109,8 @@ class Simulate:
                     go_to_line = self.order[i]["after_end"].pop(0)
                     self.order.insert(0, go_to_line) 
                     i += 1
-                self.change_goal()
                 self.order.pop(i)
+                self.change_goal()
             else:
                 self.reached_goal = True
                 raise ValueError("Invalid line")
