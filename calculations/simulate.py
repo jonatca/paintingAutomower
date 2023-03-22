@@ -102,15 +102,15 @@ class Simulate:
                 self.order[0].pop("end")  # unnecessary
                 if "after_end" not in self.order[0]:
                     self.order.pop(0)  # removes the line from the list
-            elif "after_end" in self.order[0]:
-                i = 0
-                while len(self.order[i]["after_end"]) > 0:
-                    print("order[i]", self.order[i]["after_end"])
-                    go_to_line = self.order[i]["after_end"].pop(0)
-                    self.order.insert(0, go_to_line) 
-                    i += 1
-                self.order.pop(i)
-                self.change_goal()
+            # elif "after_end" in self.order[0]:
+            #     i = 0
+            #     while len(self.order[i]["after_end"]) > 0:
+            #         print("order[i]", self.order[i]["after_end"])
+            #         go_to_line = self.order[i]["after_end"].pop(0)
+            #         self.order.insert(0, go_to_line) 
+            #         i += 1
+            #     self.order.pop(i)
+            #     self.change_goal()
             else:
                 self.order.pop(0)
             self.data["x_goal"].append(self.x_goal)
