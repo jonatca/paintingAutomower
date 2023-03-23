@@ -13,7 +13,7 @@ import numpy as np
 from calc_velocities import CalcVelocities
 from paint import get_paint_order
 from plot_data import plot_data
-
+import datetime
 class Drive_to:
     def __init__(self, reset_angle=True):
         self.update_freq = 10.0  # Hz but doesn't work? stuck at 10 Hz
@@ -92,10 +92,15 @@ class Drive_to:
         self.twist.linear.x = 0.0
         self.twist.angular.z = 0.0
         self.pub.publish(self.twist)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        timestamp = int(timestamp.replace("-", ""))
+        #make filename variable with python 2.7
+        filename = "../data/{}.json".format(timestamp) #check if this works
+        # filename = f"../data/{timestamp}.json"
         if self.store_data:  
-            with open("data.json", "w") as json_file:
+            with open(filename, "w") as json_file:
                 json.dump(self.data, json_file)
-            plot_data()
+            plot_data(filename)
         rospy.loginfo(
             "Automower has moved to position x=%s, y=%s",
             round(self.x, 2),

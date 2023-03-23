@@ -9,14 +9,11 @@ from matplotlib.patches import Circle
 
 
 
-def plot_data(GPS=True, simulated=False):
+def plot_data(GPS=True, filename="data.json"):
     matplotlib.use(
         "Agg"
     )  # Set the backend to Agg (non-interactive) to avoid display errors
-    file = "data.json"
-    if simulated:
-        file = "simulatedData.json"
-    with open(file, "r") as json_file:
+    with open(filename, "r") as json_file:
         data = json.load(json_file)
     x = data["x"]
     y = data["y"]
