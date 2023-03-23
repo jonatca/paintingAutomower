@@ -137,7 +137,7 @@ class Drive_to:
 
     def change_goal(self):
         if len(self.paint_order) > 0:
-            if "start" in self.paint_order[0]:
+            if "start" in self.paint_order[0]: #TODO remove this
                 self.pid.not_in_circle()
                 x_goal_prim, y_goal_prim = self.paint_order[0]["start"]
                 self.paint_order[0].pop("start")
