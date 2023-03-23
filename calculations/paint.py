@@ -153,22 +153,18 @@ def get_paint_order():
        # corner_arc_left_up,
     ]
     longside_down = {
-        "start": (1, 0),
         "end": (3, 0),
         "type": "line",
     }
     line1 = {
-        "start": (-1,0),
-        "end": (-1,-2),
+        "end": (0,2),
         "type": "line",
     }
     line2 = {
-        "start": (1,-1),
         "end": (1,0),
         "type": "line",
     }
     circle = {
-        "start": (2,0),
         "end": (1,-1),
         "center": (2,-1),
         "radius": 1,
@@ -177,9 +173,8 @@ def get_paint_order():
         "after_end": turn270(1,-1,'x')
     }   
     circle2 = {
-        "start": (1,0),
-        "end": (-1,0),
-        "center": (0,0),
+        "end": (2,0),
+        "center": (1,0),
         "radius": 1,
         "type": "circle",
         "direction": "positive",
@@ -187,7 +182,7 @@ def get_paint_order():
     }
 
     
-    paint_order = [line1, circle]
+    paint_order = [circle2]
     print("paint_order", paint_order)
     return paint_order
 def turn270(x, y, travel_dir):

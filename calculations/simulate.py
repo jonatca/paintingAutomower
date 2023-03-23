@@ -94,36 +94,32 @@ class Simulate:
         print("Shutting down")
    
     def change_goal(self):
-        print(self.order, "order")
-        if len(self.order) > 0:
-            if "start" in self.order[0]: #TODO remove this if statement
-                self.pid.not_in_circle()
-                self.x_goal, self.y_goal = self.order[0]["start"]
-                self.order[0].pop("start")
-            elif "end" in self.order[0]:
+        # print(self.order, "order")
+        if len(self.order) > 0: #if there are still lines to drive
+            self.pid.not_in_circle() #always assume not a circle
+            # if "start" in self.order[0]: #TODO remove this if statement
+            #     self.x_goal, self.y_goal = self.order[0]["start"]
+            #     self.order[0].pop("start")
+            if "end" in self.order[0]:
                 self.drive_in_circle = False
                 if self.order[0]["type"] == "circle":  # start to go in circle
                     self.radius = self.order[0]["radius"]
                     self.x_mid, self.y_mid = self.order[0]["center"]
                     direction = self.order[0]["direction"]
                     self.drive_in_circle = True
-
                     self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid, direction)
-                
                 self.x_goal, self.y_goal = self.order[0]["end"]
                 self.order[0].pop("end") 
                 # self.order.pop(0)
             elif "after_end" in self.order[0]:
                 i = 0
                 while len(self.order[i]["after_end"]) > 0:
-                    print("order[i]", self.order[i]["after_end"])
                     go_to_line = self.order[i]["after_end"].pop(0)
                     self.order.insert(i, go_to_line) 
                     i += 1
                 self.order.pop(i)
                 self.change_goal()
-            else:
-                print("error in order, poping")
+            else: # if has no after_end (probably was a after_end) 
                 self.order.pop(0)
                 self.change_goal()
             self.data["x_goal"].append(self.x_goal)
@@ -133,9 +129,9 @@ class Simulate:
                 self.data["x_mid"].append(self.x_mid)
                 self.data["y_mid"].append(self.y_mid)
             # print("changed goal to", self.x_goal, self.y_goal)
-            print("changed goal to", self.x_goal, self.y_goal)
+            # print("changed goal to", self.x_goal, self.y_goal)
             self.pid.set_goal_coords(self.x_goal, self.y_goal)
-            # print("The process has ", round(len(self.order) / self.tot_num_lines * 100, 1), "procent left")
+            print("The process has ", round(len(self.order) / self.tot_num_lines * 100, 1), "procent left")
         else:
             self.reached_goal = True
 
