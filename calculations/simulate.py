@@ -83,9 +83,9 @@ class Simulate:
         # print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
         # print("sqare error radius was", round(self.pid.square_error_radius, 4))
         # print("position", self.x, self.y)
-        with open("data.json", "w") as json_file:
+        with open("simulatedData.json", "w") as json_file:
             json.dump(self.data, json_file)
-        plot_data(False)
+        plot_data(GPS = False, simulated = True)
         pass
 
     ##if ctrl+c is pressed, run self.stop()
