@@ -21,7 +21,7 @@ def plot_data(GPS=True, filename="data.json"):
     y_goal = data["y_goal"]
     if GPS:
         x_gps = data["x_gps"]
-        y_gps = data["x_gps"]
+        y_gps = data["y_gps"]
     try:
         radius = data["radius"][0]
         x_mid = data["x_mid"][0]
