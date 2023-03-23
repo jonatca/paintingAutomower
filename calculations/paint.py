@@ -27,10 +27,10 @@ def get_paint_order():
     penalty_arc_radius = round(float(user_input["penaltyArcRadius"]), 4)
     num_comb_lines = round(float(user_input["numCombLines"]), 4)
 
-    shortside_right = {"start": (0, 0), "end": (width, 0), "type": "line"}
-    longside_up = {"start": (width, 0), "end": (width, lenght), "type": "line"}
-    shortside_left = {"start": (width, lenght), "end": (0, lenght), "type": "line"}
-    longside_down = {"start": (0, lenght), "end": (0, 0), "type": "line"}
+    shortside_down = {"end": (width, 0),"after_end": turn270flag(width,0,'x'), "type": "line"}
+    longside_right = {"end": (width, lenght),"after_end": turn270flag(width,lenght,'y'), "type": "line"}
+    shortside_up = {"end": (0, lenght),"after_end": turn270flag(0,lenght,'-x'), "type": "line"}
+    longside_left = {"end": (0, 0),"after_end": turn270flag(0,0,'-y'), "type": "line"}
     midline = {"start": (0, lenght / 2), "end": (width, lenght / 2), "type": "line"}
     goal_box_right_1 = {
         "start": (width / 2 - goal_box_width / 2, 0),
@@ -131,10 +131,10 @@ def get_paint_order():
 
 
     paint_order = [
-        longside_up,
-        shortside_left,
-        longside_down,
-        shortside_right,
+        shortside_down,
+        longside_right,
+        shortside_up,
+        longside_left,
         #midline,
         #goal_box_right_2,
         #goal_box_right_3,
@@ -152,37 +152,15 @@ def get_paint_order():
        # corner_arc_left_down,
        # corner_arc_left_up,
     ]
-    longside_down = {
-        "end": (3, 0),
-        "type": "line",
-    }
-    line1 = {
-        "end": (0,2),
-        "type": "line",
-    }
-    line2 = {
-        "end": (1,0),
-        "type": "line",
-    }
-    circle = {
-        "end": (1,-1),
-        "center": (2,-1),
-        "radius": 1,
-        "type": "circle",
-        "direction": "negative",
-        "after_end": turn270(1,-1,'x')
-    }   
-    circle2 = {
-        "end": (2,0),
-        "center": (1,0),
-        "radius": 1,
-        "type": "circle",
-        "direction": "positive",
-        "after_end": [line1]
-    }
+    #shortside_down = {
+     #   "end": (0,-2),
+      #  "type": "line",
+       # "after_end": turn270flag(0,-2,'-y')
 
+    #}
     
-    paint_order = [circle2]
+    
+    #paint_order = [shortside_down]
     print("paint_order", paint_order)
     return paint_order
 def turn270(x, y, travel_dir):
@@ -218,6 +196,111 @@ def turn270(x, y, travel_dir):
         "end":(x,y),
         "type": "line"
         },]
+
+def turn270flag(x, y, travel_dir):
+    if travel_dir == 'x':
+        x1 = x-1
+        y1 = y-1
+        x2 = x-1
+        y2 = y
+        x3 = x
+        y3 = y+1
+        x4 = x+1
+        y4 = y+1
+
+        x5 = x
+        y5 = y-1
+        x6 = x+1
+        y6 = y    
+    elif travel_dir == '-x':
+        x1 = x+1
+        y1 = y+1
+        x2 = x+1
+        y2 = y
+        x3 = x
+        y3 = y-1
+        x4 = x-1
+        y4 = y-1
+
+        x5 = x
+        y5 = y+1
+        x6 = x-1
+        y6 = y
+    elif travel_dir == 'y':
+        x1 = x+1
+        y1 = y-1
+        x2 = x
+        y2 = y-1
+        x3 = x-1
+        y3 = y
+        x4 = x-1
+        y4 = y+1
+
+        x5 = x+1
+        y5 = y
+        x6 = x
+        y6 = y+1
+    elif travel_dir == '-y':
+        x1 = x-1
+        y1 = y+1
+        x2 = x
+        y2 = y+1
+        x3 = x+1
+        y3 = y
+        x4 = x+1
+        y4 = y-1
+
+        x5 = x-1
+        y5 = y
+        x6 = x
+        y6 = y-1
+
+
+
+    return  [
+        {
+        "end": (x1,y1),
+        "center": (x5,y5),
+        "radius": 1,
+        "type": "circle",
+        "direction": "negative"
+        },
+        {
+        "end":(x2,y2),
+        "type": "line"
+        },
+        {
+         "end":(x3,y3),
+         "center":(x,y),
+         "radius": 1,
+         "type": "circle",
+         "direction": "negative"
+         },
+         {
+         "end": (x4,y4),
+         "type": "line"
+         },
+         {
+         "end": (x,y),
+         "center":(x6,y6),
+         "radius": 1,
+         "type": "circle",
+         "direction": "negative"
+         }
+
+        
+        
+        ]
+
+    #elif travel_dir == 'y':
+     #   x1 = x
+      #  y1 = y+1    
+       # x2 = x+1
+        #y2 = y
+        #x3 = x
+        #y3 = y
+
+
 # def get_turn():
 #     [{
 #         "start": (0, 0),
