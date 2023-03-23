@@ -34,3 +34,8 @@ To run simulation:
 To get position run this in terminal "cd 450/src/hrp/am_driver_scripts", then: "rostopic echo /pose"
 To get GPS run this in termrminal: "cd 450/src/hrp/am_driver/scripts", then: "rostopic echo /GPSfix"
 To see all rostopics run this in termrminal: "cd 450/src/hrp/am_driver/scripts", then: "rostopic echo /GPSfix"
+
+
+
+Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/plot_data.py" to plot data 
+Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/simulate.py" to simulate
