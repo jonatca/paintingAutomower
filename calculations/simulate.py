@@ -66,7 +66,7 @@ class Simulate:
             if self.len_vel == 0 and self.ang_vel == 0:
                 self.change_goal()
             self.time_elapsed += self.dt
-            if i % 5== 0:
+            if i % 20== 0: #to plot every 2 seconds
                 self.stop()
             i+=1
         if save_data:
@@ -82,7 +82,7 @@ class Simulate:
         # print("the sqaure error was", round(self.get_square_error(), 4))
         # print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
         # print("sqare error radius was", round(self.pid.square_error_radius, 4))
-        print("position", self.x, self.y)
+        # print("position", self.x, self.y)
         with open("data.json", "w") as json_file:
             json.dump(self.data, json_file)
         plot_data(False)
@@ -105,23 +105,27 @@ class Simulate:
                 if self.order[0]["type"] == "circle":  # start to go in circle
                     self.radius = self.order[0]["radius"]
                     self.x_mid, self.y_mid = self.order[0]["center"]
+                    direction = self.order[0]["direction"]
                     self.drive_in_circle = True
-                    self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid)
+
+                    self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid, direction)
                 
                 self.x_goal, self.y_goal = self.order[0]["end"]
-                self.order[0].pop("end")  # unnecessary
+                self.order[0].pop("end") 
+                # self.order.pop(0)
+            elif "after_end" in self.order[0]:
+                i = 0
+                while len(self.order[i]["after_end"]) > 0:
+                    print("order[i]", self.order[i]["after_end"])
+                    go_to_line = self.order[i]["after_end"].pop(0)
+                    self.order.insert(i, go_to_line) 
+                    i += 1
+                self.order.pop(i)
+                self.change_goal()
+            else:
+                print("error in order, poping")
                 self.order.pop(0)
-            # elif "after_end" in self.order[0]:
-            #     i = 0
-            #     while len(self.order[i]["after_end"]) > 0:
-            #         print("order[i]", self.order[i]["after_end"])
-            #         go_to_line = self.order[i]["after_end"].pop(0)
-            #         self.order.insert(0, go_to_line) 
-            #         i += 1
-            #     self.order.pop(i)
-            #     self.change_goal()
-            # else:
-            #     self.order.pop(0)
+                self.change_goal()
             self.data["x_goal"].append(self.x_goal)
             self.data["y_goal"].append(self.y_goal)
             if self.drive_in_circle:

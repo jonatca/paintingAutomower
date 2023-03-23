@@ -153,13 +153,18 @@ def get_paint_order():
        # corner_arc_left_up,
     ]
     longside_down = {
-        "start": (0, 0),
-        "end": (1, 0),
+        "start": (1, 0),
+        "end": (3, 0),
         "type": "line",
     }
     line1 = {
-        "start": (1,0),
-        "end": (2,0),
+        "start": (-1,0),
+        "end": (-1,-2),
+        "type": "line",
+    }
+    line2 = {
+        "start": (1,-1),
+        "end": (1,0),
         "type": "line",
     }
     circle = {
@@ -168,38 +173,58 @@ def get_paint_order():
         "center": (2,-1),
         "radius": 1,
         "type": "circle",
+        "direction": "negative",
+        "after_end": turn270(1,-1,'x')
     }   
-    line2 = {
-        "start": (1,-1),
-        "end": (1,0),
-        "type": "line",
+    circle2 = {
+        "start": (1,0),
+        "end": (-1,0),
+        "center": (0,0),
+        "radius": 1,
+        "type": "circle",
+        "direction": "positive",
+        "after_end": [line1]
     }
 
     
-    paint_order = [line1, circle, line2]
+    paint_order = [line1, circle]
     print("paint_order", paint_order)
     return paint_order
-def turn270(x, y):
+def turn270(x, y, travel_dir):
+    if travel_dir == 'x':
+        x1 = x+1
+        y1 = y
+        x2 = x
+        y2 = y-1
+        x3 = x
+        y3 = y
+    elif travel_dir == 'y':
+        x1 = x
+        y1 = y+1    
+        x2 = x+1
+        y2 = y
+        x3 = x
+        y3 = y
     return  [{
         "start": (x, y),
-        "end": (x+1, y),
+        "end": (x1, y1),
         "type": "line",
     },
     {
-        "start": (x+1, y),
+        "start": (x1, y1),
         "end": (x,y-1),
         "center": (x+1,y-1),
         "radius": 1,
         "type": "circle",
+        "direction": "negative"
         },
         {
         "start": (x,y-1),
         "end":(x,y),
         "type": "line"
         },]
-# def get_turn(turn_dir, radius):
-#     if turn_dir == "right":
-#     right_turn = [{
+# def get_turn():
+#     [{
 #         "start": (0, 0),
 #         "end": (1,0),
 #         "type": "line",
@@ -210,6 +235,7 @@ def turn270(x, y):
 #         "center": (1,-1),
 #         "radius": 1,
 #         "type": "circle",
+#         "direction": "negative"
 #     },
 #     {
 #         "start": (0,-1),

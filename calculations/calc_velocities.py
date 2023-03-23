@@ -3,7 +3,7 @@ import numpy as np
 
 class CalcVelocities:
     def __init__(self, Kp_circle=366.94510324142476, Kp90_circle=85.967317866): 
-        self.tol_lin = 0.3  # tolerance in meter
+        self.tol_lin = 0.05  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
         self.max_vel_lin = 0.3
@@ -33,12 +33,18 @@ class CalcVelocities:
         self.square_error_radius = 0
         self.times_above_tol_ang = 0
         self.has_moved = False
+        self.dir = 1
 
-    def set_circle_params(self, radius, x_mid, y_mid):
+    def set_circle_params(self, radius, x_mid, y_mid, dir):
         self.radius = radius
         self.x_mid = x_mid
         self.y_mid = y_mid
-        self.theoretical_vel_ang = self._circle_vel_ang()
+        self.dir = 0
+        self.Kp_circle = np.abs(self.Kp_circle)
+        if dir == "negative":
+            self.dir = np.pi
+            self.Kp_circle = np.abs(self.Kp_circle) * -1
+        self.dir = np.pi if dir == "negative" else 0
         self.paint_circle = True
         self.max_vel_lin = 0.2
         # self.tol_ang = 7 * np.pi/180
@@ -129,7 +135,7 @@ class CalcVelocities:
         # Calculate the tangent vector
         T_x = -V_y_norm
         T_y = V_x_norm
-        return np.arctan2(T_y, T_x)
+        return self._normalize_angle(self.dir + np.arctan2(T_y, T_x))
 
     def _normalize_angle(self, angle):
         while angle > np.pi:
