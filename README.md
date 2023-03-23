@@ -39,3 +39,9 @@ To see all rostopics run this in termrminal: "cd 450/src/hrp/am_driver/scripts",
 
 Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/plot_data.py" to plot data 
 Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/simulate.py" to simulate
+
+
+To change wifi
+
+1. sudo nmcli device wifi list
+2. sudo nmcli device wifi connect SSID password PASSWORD
