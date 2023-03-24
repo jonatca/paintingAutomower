@@ -11,7 +11,7 @@ class Simulate:
         self.max_time = 1500
         paint_order = get_paint_order()
         comb_cut_order = get_comb_cut_order()
-        self.order = paint_order
+        self.order = paint_order # välj om comb_cut eller paint order
         self.tot_num_lines = len(self.order)
         self.update_freq = 10  # Hz but doesn't work? stuck at 10 Hz
 
