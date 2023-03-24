@@ -13,6 +13,7 @@ import numpy as np
 from calc_velocities import CalcVelocities
 from paint import get_paint_order
 from plot_data import plot_data
+from change_goal import change_goal
 import datetime
 class Drive_to:
     def __init__(self, reset_angle=True):
@@ -121,7 +122,7 @@ class Drive_to:
             self.x_start = pose.pose.position.x
             self.y_start = pose.pose.position.y
             self.pid = CalcVelocities(self.update_freq)
-            self.change_goal()  # sets initial goal/
+            change_goal(self, simulation = False)  # sets initial goal/
 
         self.x = pose.pose.position.x
         self.y = pose.pose.position.y
@@ -133,53 +134,8 @@ class Drive_to:
             self.data["y"].append(self.y)
         # if close to goal, cahnge goal
         if lin_vel == 0.0 and ang_vel == 0.0:
-            self.change_goal()
+            change_goal(self, simulation = False)
 
-    def change_goal(self):
-        if len(self.paint_order) > 0:
-            if "start" in self.paint_order[0]: #TODO remove this
-                self.pid.not_in_circle()
-                x_goal_prim, y_goal_prim = self.paint_order[0]["start"]
-                self.paint_order[0].pop("start")
-            elif "end" in self.paint_order[0]:
-                print("end")
-                self.drive_in_circle = False
-                if self.paint_order[0]["type"] == "circle":  # start to go in circle
-                    print("start to go in circle")
-                    self.radius = self.paint_order[0]["radius"]
-                    x_mid_prim, y_mid_prim = self.paint_order[0]["center"]
-                    self.x_mid, self.y_mid = self.change_coord_sys(
-                        x_mid_prim, y_mid_prim
-                    )
-                    self.drive_in_circle = True
-                    self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid)
-                x_goal_prim, y_goal_prim = self.paint_order[0]["end"]
-                self.paint_order[0].pop("end")  # unnecessary
-            elif "after_end" in self.paint_order[0]:
-                i = 0
-                while len(self.paint_order[i]["after_end"]) > 0:
-                    print("paint_order[i]", self.paint_order[i]["after_end"])
-                    go_to_line = self.paint_order[i]["after_end"].pop(0)
-                    self.paint_order.insert(0, go_to_line) 
-                    i += 1
-                self.change_goal()
-                self.paint_order.pop(i)
-            else:
-                self.paint_order.pop(0)
-                self.reached_goal = True
-                raise ValueError("Invalid line")
-            x_goal, y_goal = self.change_coord_sys(x_goal_prim, y_goal_prim)
-            self.data["x_goal"].append(x_goal)
-            self.data["y_goal"].append(y_goal)
-            if self.drive_in_circle: 
-                self.data["radius"].append(self.radius)
-                self.data["x_mid"].append(self.x_mid)
-                self.data["y_mid"].append(self.y_mid)
-            print("changed goal to", x_goal, y_goal)
-            print(x_goal, y_goal, "x_goal", "y_goal")
-            self.pid.set_goal_coords(x_goal, y_goal)
-        else:
-            self.reached_goal = True
 
     def ctrlc_shutdown(self, sig, frame):
         self.stop()

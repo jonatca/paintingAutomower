@@ -4,7 +4,7 @@ from calc_velocities import CalcVelocities
 from paint import get_paint_order
 from comb_cut import get_comb_cut_order
 from plot_data import plot_data
-
+from change_goal import change_goal
 
 class Simulate:
     def __init__(self, pid=None):
@@ -38,7 +38,7 @@ class Simulate:
             self.pid = CalcVelocities() #TODO add update freq
         else:
             self.pid = pid
-        self.change_goal()
+        change_goal(self, simulation=True)
         self.dt = 1 / self.update_freq
         self.time_elapsed = 0
 
@@ -64,9 +64,9 @@ class Simulate:
             self.data["x"].append(self.x)
             self.data["y"].append(self.y)
             if self.len_vel == 0 and self.ang_vel == 0:
-                self.change_goal()
+                change_goal(self, simulation=True)
             self.time_elapsed += self.dt
-            if i % 20== 0: #to plot every 2 seconds
+            if i % 2000== 0: #to plot every 2 seconds
                 self.stop()
             i+=1
         if save_data:
@@ -89,52 +89,10 @@ class Simulate:
         plot_data(GPS = False, filename = filename)
         pass
 
-    ##if ctrl+c is pressed, run self.stop()
+    #if ctrl+c is pressed, run self.stop()
     def ctrlc_shutdown(self, signum, frame):
         self.stop()
         print("Shutting down")
-   
-    def change_goal(self):
-        # print(self.order, "order")
-        if len(self.order) > 0: #if there are still lines to drive
-            self.pid.not_in_circle() #always assume not a circle
-            # if "start" in self.order[0]: #TODO remove this if statement
-            #     self.x_goal, self.y_goal = self.order[0]["start"]
-            #     self.order[0].pop("start")
-            if "end" in self.order[0]:
-                self.drive_in_circle = False
-                if self.order[0]["type"] == "circle":  # start to go in circle
-                    self.radius = self.order[0]["radius"]
-                    self.x_mid, self.y_mid = self.order[0]["center"]
-                    direction = self.order[0]["direction"]
-                    self.drive_in_circle = True
-                    self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid, direction)
-                self.x_goal, self.y_goal = self.order[0]["end"]
-                self.order[0].pop("end") 
-                # self.order.pop(0)
-            elif "after_end" in self.order[0]:
-                i = 0
-                while len(self.order[i]["after_end"]) > 0:
-                    go_to_line = self.order[i]["after_end"].pop(0)
-                    self.order.insert(i, go_to_line) 
-                    i += 1
-                self.order.pop(i)
-                self.change_goal()
-            else: # if has no after_end (probably was a after_end) 
-                self.order.pop(0)
-                self.change_goal()
-            self.data["x_goal"].append(self.x_goal)
-            self.data["y_goal"].append(self.y_goal)
-            if self.drive_in_circle:
-                self.data["radius"].append(self.radius)
-                self.data["x_mid"].append(self.x_mid)
-                self.data["y_mid"].append(self.y_mid)
-            # print("changed goal to", self.x_goal, self.y_goal)
-            # print("changed goal to", self.x_goal, self.y_goal)
-            self.pid.set_goal_coords(self.x_goal, self.y_goal)
-            print("The process has ", round(len(self.order) / self.tot_num_lines * 100, 1), "procent left")
-        else:
-            self.reached_goal = True
 
 
 if __name__ == "__main__":
