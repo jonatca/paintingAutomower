@@ -1,32 +1,40 @@
 import json
 import matplotlib
 import datetime
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-
 matplotlib.use(
     "Agg"
 )  # Set the backend to Agg (non-interactive) to avoid display errors
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 
 
-def plot_data():
-    with open("data.json", "r") as json_file:
+
+def plot_data(GPS=True, filename="data.json"):
+    matplotlib.use(
+        "Agg"
+    )  # Set the backend to Agg (non-interactive) to avoid display errors
+    with open(filename, "r") as json_file:
         data = json.load(json_file)
     x = data["x"]
     y = data["y"]
     x_goal = data["x_goal"]
     y_goal = data["y_goal"]
+    if GPS:
+        x_gps = data["x_gps"]
+        y_gps = data["y_gps"]
     try:
         radius = data["radius"][0]
         x_mid = data["x_mid"][0]
         y_mid = data["y_mid"][0]
         # Add the optimal circle
-        circle = Circle((x_mid, y_mid), radius, edgecolor="blue", facecolor="none")
+        circle = Circle((x_mid, y_mid), radius, edgecolor="red", facecolor="none")
         plt.gca().add_patch(circle)
     except:
         pass
-    plt.plot(x, y, "o-", label="Path")
-    plt.plot(x_goal, y_goal, "rx", markersize=10, label="Goal")
+    plt.plot(x, y, "o-", label="Path Ordometri", markersize=3)
+    plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
+    if GPS:
+        plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
 
     plt.xlabel("x")
     plt.ylabel("y")
@@ -34,6 +42,11 @@ def plot_data():
     plt.legend()
     plt.axis("equal")
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    plt.savefig(f"plots/plot-{timestamp}.png")
-    plt.savefig(f"plots/plot-latest.png")
-    print(f"Saved plot to plots/plot-{timestamp}.png")
+    timestamp = int(timestamp.replace("-", ""))
+    plt.savefig("plots/plot-latest.png")
+    # plt.savefig("plots/plot-%d.png" % timestamp)
+    # print("Saved plot to plots/plot-", {timestamp}, ".png")
+
+
+if __name__ == "__main__":
+    plot_data()
