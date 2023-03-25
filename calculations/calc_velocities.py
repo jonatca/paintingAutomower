@@ -2,7 +2,7 @@ import numpy as np
 
 
 class CalcVelocities:
-    def __init__(self, Kp_circle=366.94510324142476, Kp90_circle=246.27): 
+    def __init__(self, Kp_circle=0, Kp90_circle=16.27): 
         self.tol_lin = 0.05  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
@@ -76,14 +76,13 @@ class CalcVelocities:
         self.error_ang = self.current_ang - self.goal_ang
         self.error_ang = self._normalize_angle(self.error_ang)
 
-        theoretical_ang_vel = self.max_vel_lin / self.radius
+        theoretical_ang_vel = -self.max_vel_lin / self.radius
         self.vel_lin = self.max_vel_lin
+        print(self.error_ang)
         if np.abs(self.error_ang) < self.tol_ang:
-            self.vel_ang = -(
-                self.Kp_circle * self.error_radius * self.dt
+            self.vel_ang = theoretical_ang_vel - self.Kp_circle * self.error_radius * self.dt
                 # + self.Ki_circle * self.error_radius_sum
                 # + self.Kd_circle * self.error_radius_deriv
-            ) / self.radius #normalize to radius
         else:
             self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt/self.radius
                 # + self.Ki_circle * self.error_radius_sum
@@ -117,7 +116,7 @@ class CalcVelocities:
             # print("Goal reached")
             self.vel_lin = 0
             self.vel_ang = 0
-        # self._log_message()
+        self._log_message()
         if np.abs(self.error_ang) > self.tol_ang:# and not self.has_moved:  # dont move if not facing goal
             self.vel_lin = 0
             if self.has_moved:
