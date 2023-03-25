@@ -49,7 +49,7 @@ class CalcVelocities:
         self.max_vel_lin = 0.2
         if self.radius > 5: #by test, kp circle is too high for big circles
             self.Kp_circle = self.Kp_circle/2
-        self.tol_ang = 2 * np.pi/180
+        self.tol_ang = 7 * np.pi/180
 
     def not_in_circle(self):
         self.radius = None
@@ -78,7 +78,7 @@ class CalcVelocities:
 
         theoretical_ang_vel = self.max_vel_lin / self.radius
         self.vel_lin = self.max_vel_lin
-        if np.abs(self.error_ang) > self.tol_ang and not self.has_moved:
+        if np.abs(self.error_ang) > self.tol_ang:# and not self.has_moved:
             self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt
         else: 
             self.vel_ang =  theoretical_ang_vel - self.Kp_circle * self.error_radius * self.dt
@@ -114,7 +114,7 @@ class CalcVelocities:
             self.vel_lin = 0
             self.vel_ang = 0
         # self._log_message()
-        if np.abs(self.error_ang) > self.tol_ang and not self.has_moved:  # dont move if not facing goal
+        if np.abs(self.error_ang) > self.tol_ang:# and not self.has_moved:  # dont move if not facing goal
             self.vel_lin = 0
             if self.has_moved:
                 self.times_above_tol_ang += 1
