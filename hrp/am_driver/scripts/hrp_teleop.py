@@ -311,10 +311,10 @@ class HRP_Teleop(object):
         # filename = f"../data/{timestamp}.json"
         with open(filename, "w") as json_file:
             json.dump(self.data, json_file)
-        plot_data(filename)
+        plot_data(GPS=True, filename=filename)
 
     # For everything that can't be a binding, use if/elif instead
-    def process_key(self, ch):
+    def process_key(self, ch):  
         #
         # AM_DRIVER COMMANDS
         #

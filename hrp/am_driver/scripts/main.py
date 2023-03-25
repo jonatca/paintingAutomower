@@ -102,7 +102,7 @@ class Drive_to:
         if self.store_data:  #TODO check if this works
             with open(filename, "w") as json_file:
                 json.dump(self.data, json_file)
-            plot_data(filename)
+            plot_data(GPS = True, filename = filename)
         rospy.loginfo(
             "Automower has moved to position x=%s, y=%s",
             round(self.x, 2),
