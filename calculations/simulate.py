@@ -7,8 +7,8 @@ from plot_data import plot_data
 from change_goal import change_goal
 
 class Simulate:
-    def __init__(self, pid=None):
-        self.max_time = 1500
+    def __init__(self, calc_velocities=None):
+        self.max_time = 300
         paint_order = get_paint_order()
         comb_cut_order = get_comb_cut_order()
         self.order = paint_order # välj om comb_cut eller paint order
@@ -34,10 +34,10 @@ class Simulate:
         self.radius = None
         self.drive_in_circle = False
         self.reached_goal = False
-        if pid is None:
-            self.pid = CalcVelocities() #TODO add update freq
+        if calc_velocities is None:
+            self.calc_velocities = CalcVelocities() #TODO add update freq
         else:
-            self.pid = pid
+            self.calc_velocities = calc_velocities
         change_goal(self, simulation=True)
         self.dt = 1 / self.update_freq
         self.time_elapsed = 0
@@ -45,11 +45,12 @@ class Simulate:
     def get_square_error(self):
         if self.time_elapsed >= self.max_time - 10: # if the robot did not reach the goal
             return 99999999 
-        return self.pid.square_error_radius**2 * self.time_elapsed**(0.3) * (self.pid.times_above_tol_ang + 1) ** (1.8)
+        return self.calc_velocities.square_error_radius**2 * self.time_elapsed**(0.3) * (self.calc_velocities.times_above_tol_ang + 1) ** (1.8)
         
 
     def drive(self, save_data=False):
         i = 0
+        self.save_data = save_data
         while not self.reached_goal and self.time_elapsed < self.max_time:
             # calculates new x and y position based on the last velocities and last position
             position_noise = np.random.normal(loc=0, scale=0.000, size=(2,))
@@ -58,7 +59,7 @@ class Simulate:
             self.x += (self.len_vel + vel_noise_lin[0]) * np.cos(self.current_ang) * self.dt + position_noise[0]
             self.y += (self.len_vel + vel_noise_lin[0])* np.sin(self.current_ang) * self.dt + position_noise[1]
             self.current_ang += (self.ang_vel + vel_noise_ang[0]) * self.dt
-            self.len_vel, self.ang_vel = self.pid.calc_vel(
+            self.len_vel, self.ang_vel = self.calc_velocities.calc_vel(
                 self.current_ang, self.x, self.y
             )
             self.data["x"].append(self.x)
@@ -66,7 +67,7 @@ class Simulate:
             if self.len_vel == 0 and self.ang_vel == 0:
                 change_goal(self, simulation=True)
             self.time_elapsed += self.dt
-            if i % 2000== 0: #to plot every 2 seconds
+            if i % 2000== 0 and save_data: #to plot every 2 seconds
                 self.stop()
             i+=1
         if save_data:
@@ -74,20 +75,19 @@ class Simulate:
 
 
     def stop(self):
-        # print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
-        # print("the sqaure error was", round(self.get_square_error(), 4))
-        # print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
-        # print("sqare error radius was", round(self.pid.square_error_radius, 4))
-        # print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
-        # print("the sqaure error was", round(self.get_square_error(), 4))
-        # print("the times above tolerance was", round(self.pid.times_above_tol_ang, 4))
-        # print("sqare error radius was", round(self.pid.square_error_radius, 4))
-        # print("position", self.x, self.y)
+        self._prints()
         filename = "simulatedData.json"
         with open(filename, "w") as json_file:
             json.dump(self.data, json_file)
         plot_data(GPS = False, filename = filename)
         pass
+
+    # TODO Rename this here and in `stop`
+    def _prints(self):
+        print("This trip whould have taken", round(self.time_elapsed, 4), "seconds")
+        print("the sqaure error was", round(self.get_square_error(), 4))
+        print("the times above tolerance was", round(self.calc_velocities.times_above_tol_ang, 4))
+        print("sqare error radius was", round(self.calc_velocities.square_error_radius, 4))
 
     #if ctrl+c is pressed, run self.stop()
     def ctrlc_shutdown(self, signum, frame):

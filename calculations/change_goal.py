@@ -1,5 +1,7 @@
+from coord_sys_trans import change_coord_sys
+
 def change_goal(self, simulation = False):
-    print(simulation)
+    # print(simulation)
     if len(self.order) > 0:
         self.pid.not_in_circle()
         if "end" in self.order[0]:
@@ -9,7 +11,7 @@ def change_goal(self, simulation = False):
         else:
             _handle_no_end(self, simulation)
         _update_data(self, simulation)
-        print_progress(self)
+        # _print_progress(self)
     else:
         self.reached_goal = True
 
@@ -39,9 +41,9 @@ def _handle_no_end(self, simulation):
 
 def _update_data(self, simulation):
     if not simulation:
-        self.x_goal, self.y_goal = self.change_coord_sys(self.x_goal, self.y_goal)
+        self.x_goal, self.y_goal = change_coord_sys(self.x_goal, self.y_goal, self.x_start, self.y_start, self.init_angle)
         if self.drive_in_circle:
-            self.x_mid, self.y_mid = self.change_coord_sys(self.x_mid, self.y_mid)
+            self.x_mid, self.y_mid = change_coord_sys(self.x_mid, self.y_mid, self.x_start, self.y_start, self.init_angle) 
     self.data["x_goal"].append(self.x_goal)
     self.data["y_goal"].append(self.y_goal)
     if self.drive_in_circle:
@@ -50,6 +52,6 @@ def _update_data(self, simulation):
         self.data["y_mid"].append(self.y_mid)
     self.pid.set_goal_coords(self.x_goal, self.y_goal)
 
-def print_progress(self):
+def _print_progress(self):
     progress = round(len(self.order) / self.tot_num_lines * 100, 1)
     print("The process has", progress, "percent left.")
