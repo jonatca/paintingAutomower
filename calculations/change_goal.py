@@ -3,7 +3,7 @@ from coord_sys_trans import change_coord_sys
 def change_goal(self, simulation = False):
     # print(simulation)
     if len(self.order) > 0:
-        self.pid.not_in_circle()
+        self.calc_velocities.not_in_circle()
         if "end" in self.order[0]:
             _handle_end(self)
         elif "after_end" in self.order[0]:
@@ -22,7 +22,7 @@ def _handle_end(self):
         self.radius = self.order[0]["radius"]
         self.x_mid, self.y_mid = self.order[0]["center"]
         direction = self.order[0]["direction"]
-        self.pid.set_circle_params(self.radius, self.x_mid, self.y_mid, direction)
+        self.calc_velocities.set_circle_params(self.radius, self.x_mid, self.y_mid, direction)
     self.x_goal, self.y_goal = self.order[0]["end"]
     self.order[0].pop("end")
 
@@ -50,7 +50,7 @@ def _update_data(self, simulation):
         self.data["radius"].append(self.radius)
         self.data["x_mid"].append(self.x_mid)
         self.data["y_mid"].append(self.y_mid)
-    self.pid.set_goal_coords(self.x_goal, self.y_goal)
+    self.calc_velocities.set_goal_coords(self.x_goal, self.y_goal)
 
 def _print_progress(self):
     progress = round(len(self.order) / self.tot_num_lines * 100, 1)

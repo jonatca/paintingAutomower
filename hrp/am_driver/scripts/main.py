@@ -85,6 +85,7 @@ class Drive_to:
         if self.lat_start is None and self.lon_start is None:
             self.lat_start = fix.latitude
             self.lon_start = fix.longitude
+        #TODO change this to latlon_to_utm
         x_gps, y_gps = convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
@@ -102,7 +103,7 @@ class Drive_to:
         if self.store_data:  #TODO check if this works
             with open(filename, "w") as json_file:
                 json.dump(self.data, json_file)
-            plot_data(GPS = True, filename = filename)
+            plot_data(GPS = True, filename)
         rospy.loginfo(
             "Automower has moved to position x=%s, y=%s",
             round(self.x, 2),
