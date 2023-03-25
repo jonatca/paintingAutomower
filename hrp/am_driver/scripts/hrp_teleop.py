@@ -10,8 +10,12 @@ import numpy as np
 import rospy
 from am_driver.msg import BatteryStatus, Mode, SensorStatus
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import UInt16
-
+from coord_sys_trans import convert_to_xy
+import datetime
+import json
+from plot_data import plot_data
 # test
 
 
@@ -89,7 +93,7 @@ class HRP_Teleop(object):
                          self.callback_sensor_status)
         rospy.Subscriber('battery_status', BatteryStatus,
                          self.callback_battery_status)
-
+        self.gps_sub = rospy.Subscriber("/GPSfix", NavSatFix, self.gps_callback)
         self.searching = False
 
         self.shapeNum = 0x20
@@ -99,10 +103,36 @@ class HRP_Teleop(object):
         self.controlState = 0
 
         self.last_terminalWidth = 0
+        self.lat_start = None
+        self.lon_start = None
+        self.data = {
+            "x": [],
+            "y": [],
+            "x_goal": [],
+            "y_goal": [],
+            "x_mid": [],
+            "y_mid": [],
+            "radius": [],
+            "x_gps": [],
+            "y_gps": [],
+        }
+
 
     def fini(self):
         # Restore terminal settings
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
+    
+    def gps_callback(self, fix):
+        # TODO get gps uncertainty
+        if self.lat_start is None and self.lon_start is None:
+            self.lat_start = fix.latitude
+            self.lon_start = fix.longitude
+        x_gps, y_gps = convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
+        self.data["x_gps"].append(x_gps)
+        self.data["y_gps"].append(y_gps)
+        print(fix.latitude, fix.longitude, "gps")
+        print(x_gps, y_gps, "gps, converted to xy")
+
 
     def callback_sensor_status(self, data):
         if (self.operationalMode != data.operationalMode) or (self.sensorStatus != data.sensorStatus) or (
@@ -273,6 +303,16 @@ class HRP_Teleop(object):
             self.speed[0], self.speed[1], self.batAVolt, self.batBVolt)
         self.loginfo(msg)
 
+    
+    def stop(self):
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        timestamp = int(timestamp.replace("-", ""))
+        filename = "../data/{}.json".format(timestamp) #TODO check if this works
+        # filename = f"../data/{timestamp}.json"
+        with open(filename, "w") as json_file:
+            json.dump(self.data, json_file)
+        plot_data(filename)
+
     # For everything that can't be a binding, use if/elif instead
     def process_key(self, ch):
         #
@@ -289,6 +329,7 @@ class HRP_Teleop(object):
             # Stop the robot
             twist = Twist()
             self.pub_twist.publish(twist)
+            self.stop()
 
             # Stop following loop!
             mode = UInt16()
