@@ -2,7 +2,7 @@ import numpy as np
 
 
 class CalcVelocities:
-    def __init__(self, Kp_circle=33, Kp90_circle=246.27): 
+    def __init__(self, Kp_circle=366.94510324142476, Kp90_circle=246.27): 
         self.tol_lin = 0.05  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
@@ -78,10 +78,14 @@ class CalcVelocities:
 
         theoretical_ang_vel = self.max_vel_lin / self.radius
         self.vel_lin = self.max_vel_lin
-        if np.abs(self.error_ang) > self.tol_ang:# and not self.has_moved:
-            self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt
-        else: 
-            self.vel_ang =  theoretical_ang_vel - self.Kp_circle * self.error_radius * self.dt
+        if np.abs(self.error_ang) < self.tol_ang:
+            self.vel_ang = -(
+                self.Kp_circle * self.error_radius * self.dt
+                # + self.Ki_circle * self.error_radius_sum
+                # + self.Kd_circle * self.error_radius_deriv
+            ) / self.radius #normalize to radius
+        else:
+            self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt/self.radius
                 # + self.Ki_circle * self.error_radius_sum
                 # + self.Kd_circle * self.error_radius_deriv
         # print("theoretical_ang_vel: ", theoretical_ang_vel)
