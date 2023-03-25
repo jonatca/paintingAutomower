@@ -50,7 +50,7 @@ class Drive_to:
         sub = rospy.Subscriber("/pose", PoseStamped, self.pose_callback)
         self.gps_sub = rospy.Subscriber("/GPSfix", NavSatFix, self.gps_callback)
         self.rate = rospy.Rate(self.update_freq) 
-        self.paint_order = get_paint_order()
+        self.order = get_paint_order()
     
     def drive(self):
         signal.signal(
@@ -70,6 +70,8 @@ class Drive_to:
             self.x_start = pose.pose.position.x
             self.y_start = pose.pose.position.y
             change_goal(self, simulation = False)  # sets initial goal
+        self.x = pose.pose.position.x
+        self.y = pose.pose.position.y
         lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
         if lin_vel == 0.0 and ang_vel == 0.0: #TODO check if this works
             change_goal(self, simulation = False)
@@ -103,7 +105,7 @@ class Drive_to:
         if self.store_data:  #TODO check if this works
             with open(filename, "w") as json_file:
                 json.dump(self.data, json_file)
-            plot_data(GPS = True, filename)
+            plot_data(GPS = True, filename = filename)
         rospy.loginfo(
             "Automower has moved to position x=%s, y=%s",
             round(self.x, 2),
