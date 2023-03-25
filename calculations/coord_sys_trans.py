@@ -1,4 +1,4 @@
-# from pyproj import Proj, Transformer
+from pyproj import Proj, Transformer
 import numpy as np
 def convert_to_xy(lat, lon, lat_start, lon_start):
     x = (lat - lat_start) * 111139
@@ -32,13 +32,13 @@ def inverse_change_coord_sys(x_goal, y_goal, x_start, y_start, init_angle): #TOD
     return x_goal_prim, y_goal_prim  # automowers relative coordinates
 
 
-# def latlon_to_utm(lat, lon, zone_number=None, zone_letter=None):
-#     if zone_number is None or zone_letter is None:
-#         proj_utm = Proj(proj='utm', ellps='WGS84', preserve_units=False)
-#         x, y = proj_utm(lon, lat)
-#         return x, y
-#     else:
-#         proj_utm = Proj(proj='utm', zone=zone_number, zone_letter=zone_letter, ellps='WGS84', preserve_units=False)
-#         x, y = proj_utm(lon, lat)
-#         return x, y
+def latlon_to_utm(lat, lon, zone_number=None, zone_letter=None):
+    if zone_number is None or zone_letter is None:
+        proj_utm = Proj(proj='utm', ellps='WGS84', preserve_units=False)
+        x, y = proj_utm(lon, lat)
+        return x, y
+    else:
+        proj_utm = Proj(proj='utm', zone=zone_number, zone_letter=zone_letter, ellps='WGS84', preserve_units=False)
+        x, y = proj_utm(lon, lat)
+        return x, y
 
