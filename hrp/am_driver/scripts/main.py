@@ -29,6 +29,13 @@ class Drive_to:
             "radius": [],
             "x_gps": [],
             "y_gps": [],
+            "lat": [],
+            "lon": [],
+            "lat_start": [],
+            "lon_start": [],
+            "angle_north": [],
+            "angle_north_init": [],
+            "covariance": []
         }
         self.x = None 
         self.y = None
@@ -41,9 +48,7 @@ class Drive_to:
         self.twist = Twist()
         self.lat_start = None
         self.lon_start = None
-        self.covariance = {
-            "covariance": [],
-        }
+        self.covariance = None
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -58,32 +63,23 @@ class Drive_to:
         if self.lat_start is None and self.lon_start is None:
             self.lat_start = fix.latitude
             self.lon_start = fix.longitude
+            self.data["lat_start"].append(self.lat_start)
+            self.data["lon_start"].append(self.lon_start)
+            self.data["angle_north_init"].append(0)
         x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
-        self.covariance["covariance"].append(NavSatFix.position_covariance)
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
+        self.data["lat"].append(fix.latitude)
+        self.data["lon"].append(fix.longitude)
+        self.data["angle_north"].append(0)
+        self.data["covariance"].append(fix.position_covariance)
         print(fix.latitude, fix.longitude, "gps")
         print(x_gps, y_gps, "gps, converted to xy")
-        print(self.covariance,"Covariance")
 
     def convert_to_xy(self, lat, lon, lat_start, lon_start):
         x = (lat - lat_start) * 111139
         y = (lon - lon_start) * 111139
         return x, y 
-    # def change_coord_sys(
-    #     self, x_goal_prim, y_goal_prim
-    # ):  # automowers relative coordinates => global coordinates
-    #     x_goal = (
-    #         self.x_start
-    #         + x_goal_prim * np.cos(self.init_angle)
-    #         - y_goal_prim * np.sin(self.init_angle)
-    #     )
-    #     y_goal = (
-    #         self.y_start
-    #         + x_goal_prim * np.sin(self.init_angle)
-    #         + y_goal_prim * np.cos(self.init_angle)
-    #     )
-    #     return x_goal, y_goal  # automowers global coordinates
 
     def drive(self):
         signal.signal(
@@ -140,50 +136,6 @@ class Drive_to:
         # if close to goal, cahnge goal
         if lin_vel == 0.0 and ang_vel == 0.0:
             change_goal(self)
-
-    # def change_goal(self): #TODO Remove this
-    #     if len(self.paint_order) > 0:
-    #         if "start" in self.paint_order[0]: #TODO remove this
-    #             self.calc_velocities.not_in_circle()
-    #             x_goal_prim, y_goal_prim = self.paint_order[0]["start"]
-    #             self.paint_order[0].pop("start")
-    #         elif "end" in self.paint_order[0]:
-    #             print("end")
-    #             self.drive_in_circle = False
-    #             if self.paint_order[0]["type"] == "circle":  # start to go in circle
-    #                 print("start to go in circle")
-    #                 self.radius = self.paint_order[0]["radius"]
-    #                 x_mid_prim, y_mid_prim = self.paint_order[0]["center"]
-    #                 self.x_mid, self.y_mid = self.change_coord_sys(
-    #                     x_mid_prim, y_mid_prim
-    #                 )
-    #                 self.drive_in_circle = True
-    #                 self.calc_velocities.set_circle_params(self.radius, self.x_mid, self.y_mid)
-    #             x_goal_prim, y_goal_prim = self.paint_order[0]["end"]
-    #             self.paint_order[0].pop("end")  # unnecessary
-    #         elif "after_end" in self.paint_order[0]:
-    #             i = 0
-    #             while len(self.paint_order[i]["after_end"]) > 0:
-    #                 print("paint_order[i]", self.paint_order[i]["after_end"])
-    #                 go_to_line = self.paint_order[i]["after_end"].pop(0)
-    #                 self.paint_order.insert(0, go_to_line) 
-    #                 i += 1
-    #             self.change_goal()
-    #             self.paint_order.pop(i)
-    #         else:
-    #             self.paint_order.pop(0)
-    #         x_goal, y_goal = self.change_coord_sys(x_goal_prim, y_goal_prim)
-    #         self.data["x_goal"].append(x_goal)
-    #         self.data["y_goal"].append(y_goal)
-    #         if self.drive_in_circle: 
-    #             self.data["radius"].append(self.radius)
-    #             self.data["x_mid"].append(self.x_mid)
-    #             self.data["y_mid"].append(self.y_mid)
-    #         print("changed goal to", x_goal, y_goal)
-    #         print(x_goal, y_goal, "x_goal", "y_goal")
-    #         self.calc_velocities.set_goal_coords(x_goal, y_goal)
-    #     else:
-    #         self.reached_goal = True
 
     def ctrlc_shutdown(self, sig, frame):
         self.stop()

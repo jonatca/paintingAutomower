@@ -49,4 +49,4 @@ def plot_data(GPS=True, filename="data.json"):
 
 
 if __name__ == "__main__":
-    plot_data()
+    plot_data(GPS = True, filename="..data/motnorr.json")
