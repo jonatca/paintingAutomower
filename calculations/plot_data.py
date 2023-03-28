@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+import sys
+
+sys.path.append("/home/kandidatarbete/450/src/calculations")
 import json
 import matplotlib
 import datetime
@@ -8,6 +12,10 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 
 
+def convert_to_xy(lat, lon, lat_start, lon_start):
+    x = (lat - lat_start) * 111139
+    y = (lon - lon_start) * 111139
+    return x, y 
 
 def plot_data(GPS=True, filename="data.json"):
     matplotlib.use(
@@ -22,6 +30,12 @@ def plot_data(GPS=True, filename="data.json"):
     if GPS:
         x_gps = data["x_gps"]
         y_gps = data["y_gps"]
+        lat = data["lat"]
+        lon = data["lon"]
+        lat_start = data["lat_start"][0]
+        lon_start = data["lon_start"][0]
+        for i in range(len(lat)):
+            x_gps[i], y_gps[i] = convert_to_xy(lat[i], lon[i], lat_start, lon_start) 
     try:
         radius = data["radius"][0]
         x_mid = data["x_mid"][0]
@@ -44,9 +58,9 @@ def plot_data(GPS=True, filename="data.json"):
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     timestamp = int(timestamp.replace("-", ""))
     plt.savefig("plots/plot-latest.png")
-    # plt.savefig("plots/plot-%d.png" % timestamp)
-    # print("Saved plot to plots/plot-", {timestamp}, ".png")
+    plt.savefig("plots/plot-%d.png" % timestamp)
+    print("Saved plot to plots/plot-", {timestamp}, ".png")
 
 
 if __name__ == "__main__":
-    plot_data(GPS = True, filename="..data/motnorr.json")
+    plot_data(GPS = True, filename="../data/motnorr.json")
