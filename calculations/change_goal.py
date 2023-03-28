@@ -1,5 +1,5 @@
-from coord_sys_trans import change_coord_sys
-
+# from coord_sys_trans import change_coord_sys
+import numpy as np 
 def change_goal(self, simulation = False):
     # print(simulation)
     if len(self.order) > 0:
@@ -41,7 +41,7 @@ def _handle_no_end(self, simulation):
 
 def _update_data(self, simulation):
     if not simulation:
-        self.x_goal, self.y_goal = change_coord_sys(self.x_goal, self.y_goal, self.x_start, self.y_start, self.init_angle)
+        self.x_goal, self.y_goal = change_coord_sys(self, self.x_goal, self.y_goal)
         if self.drive_in_circle:
             self.x_mid, self.y_mid = change_coord_sys(self.x_mid, self.y_mid, self.x_start, self.y_start, self.init_angle) 
     self.data["x_goal"].append(self.x_goal)
@@ -51,6 +51,21 @@ def _update_data(self, simulation):
         self.data["x_mid"].append(self.x_mid)
         self.data["y_mid"].append(self.y_mid)
     self.calc_velocities.set_goal_coords(self.x_goal, self.y_goal)
+
+def change_coord_sys(
+    self, x_goal_prim, y_goal_prim
+):  # automowers relative coordinates => global coordinates
+    x_goal = (
+        self.x_start
+        + x_goal_prim * np.cos(self.init_angle)
+        - y_goal_prim * np.sin(self.init_angle)
+    )
+    y_goal = (
+        self.y_start
+        + x_goal_prim * np.sin(self.init_angle)
+        + y_goal_prim * np.cos(self.init_angle)
+    )
+    return x_goal, y_goal  # automowers global coordinates
 
 def _print_progress(self):
     progress = round(len(self.order) / self.tot_num_lines * 100, 1)

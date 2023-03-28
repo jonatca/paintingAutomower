@@ -128,11 +128,6 @@ def get_paint_order():
         "radius": corner_arc_radius,
         "type": "circle",
     }
-    line1 = {
-        "start": (0, 0),
-        "end": (1,-1),
-        "type": "line",
-    }
     test_circle = {
         "end": (1, 1),
         "center": (1, 0),
@@ -140,6 +135,7 @@ def get_paint_order():
         "type": "circle",
         "direction": "positive",
     }
+
 
     paint_order = [
         shortside_down,
@@ -170,8 +166,8 @@ def get_paint_order():
 
     #}
     
-
-    paint_order = [line1, test_circle]
+    
+    #paint_order = [shortside_down]
     print("paint_order", paint_order)
     return paint_order
 def turn270(x, y, travel_dir):
