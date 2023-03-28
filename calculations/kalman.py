@@ -1,5 +1,6 @@
 import numpy as np
-
+from numpy import linalg
+from numpy import inv 
 class EKF2D:
     def __init__(self, initial_state, initial_covariance, process_noise, measurement_noise):
         self.state = initial_state
