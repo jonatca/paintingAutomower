@@ -18,16 +18,16 @@ def cost_function(params_array):
     return np.array([optimize_pid(params) for params in params_array])
 
 
-# Set the bounds for the PID parameters (Kp, Ki, Kd, Kp90)
-lower_bounds = [19, 20]
-upper_bounds = [400, 100]
+# Set the bounds for the PID parameters (kp, kp90) 
+lower_bounds = [0, 240]
+upper_bounds = [50, 241]
 options = {"c1": 0.5, "c2": 0.3, "w": 0.9}
 optimizer = ps.single.GlobalBestPSO(
     n_particles=30, dimensions=2, options=options, bounds=(lower_bounds, upper_bounds)
 )
 # Perform optimization
-cost, pos = optimizer.optimize(cost_function, iters=50)
-print("Optimized Kp90:", pos[0], "Optimized Kp:", pos[1])
+cost, pos = optimizer.optimize(cost_function, iters=30)
+print("Optimized Kp:", pos[0], "Optimized Kp90:", pos[1])
 pid = CalcVelocities(Kp_circle=pos[0], Kp90_circle=pos[1]) 
 sim = Simulate(pid=pid)
 sim.drive(True)

@@ -166,8 +166,6 @@ class Drive_to:
                 self.paint_order.pop(i)
             else:
                 self.paint_order.pop(0)
-                self.reached_goal = True
-                raise ValueError("Invalid line")
             x_goal, y_goal = self.change_coord_sys(x_goal_prim, y_goal_prim)
             self.data["x_goal"].append(x_goal)
             self.data["y_goal"].append(y_goal)

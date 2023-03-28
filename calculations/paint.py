@@ -128,6 +128,13 @@ def get_paint_order():
         "radius": corner_arc_radius,
         "type": "circle",
     }
+    test_circle = {
+        "end": (1, 1),
+        "center": (1, 0),
+        "radius": 1,
+        "type": "circle",
+        "direction": "positive",
+    }
 
 
     paint_order = [
@@ -159,6 +166,8 @@ def get_paint_order():
 
     #}
     
+    paint_order = [
+        test_circle]
     
     #paint_order = [shortside_down]
     print("paint_order", paint_order)

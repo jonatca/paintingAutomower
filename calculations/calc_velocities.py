@@ -2,7 +2,7 @@ import numpy as np
 
 
 class CalcVelocities:
-    def __init__(self, Kp_circle=366.94510324142476, Kp90_circle=85.967317866): 
+    def __init__(self, Kp_circle=0, Kp90_circle=16.27): 
         self.tol_lin = 0.05  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
@@ -47,7 +47,10 @@ class CalcVelocities:
         self.dir = np.pi if dir == "negative" else 0
         self.paint_circle = True
         self.max_vel_lin = 0.2
-        # self.tol_ang = 7 * np.pi/180
+        if self.radius > 5: #by test, kp circle is too high for big circles
+            self.Kp_circle = self.Kp_circle/2
+        self.tol_ang = 7 * np.pi/180
+
     def not_in_circle(self):
         self.radius = None
         self.x_mid = None
@@ -55,7 +58,46 @@ class CalcVelocities:
         self.paint_circle = False
         self.max_vel_lin = 0.3
         self.tol_ang = 7 * np.pi/180
-    
+
+    def calc_radius_velocities(self):
+        current_radius = np.sqrt(
+            (self.x - self.x_mid) ** 2 + (self.y - self.y_mid) ** 2
+        )
+        self.error_radius = self.radius - current_radius
+        self.error_radius_sum += self.error_radius * self.dt
+        self.square_error_radius += self.error_radius**2
+        self.error_radius_deriv = (
+            self.error_radius - self.error_radius_prev
+        ) / self.dt
+        self.error_radius_prev = self.error_radius
+        self.goal_ang = self._goal_angle_circle(
+            self.x_mid, self.y_mid, self.x, self.y
+        )
+        self.error_ang = self.current_ang - self.goal_ang
+        self.error_ang = self._normalize_angle(self.error_ang)
+
+        theoretical_ang_vel = -self.max_vel_lin / self.radius
+        self.vel_lin = self.max_vel_lin
+        print(self.error_ang)
+        if np.abs(self.error_ang) < self.tol_ang:
+            self.vel_ang = theoretical_ang_vel - self.Kp_circle * self.error_radius * self.dt
+                # + self.Ki_circle * self.error_radius_sum
+                # + self.Kd_circle * self.error_radius_deriv
+        else:
+            self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt/self.radius
+                # + self.Ki_circle * self.error_radius_sum
+                # + self.Kd_circle * self.error_radius_deriv
+        # print("theoretical_ang_vel: ", theoretical_ang_vel)
+
+    def calc_line_velocities(self):
+        self.goal_ang = self._goal_angle_line()
+        self.error_ang = self.goal_ang - self.current_ang
+        self.error_ang = (self.error_ang + np.pi) % (2 * np.pi) - np.pi
+        if np.abs(self.error_ang) < self.min_tol_ang:  # to avoid calculatins error
+            self.error_ang = 0
+        self.vel_lin = self.Kp_l * self.error_lin  # slow down when close to goal
+        self.vel_ang = self.Kp_a * self.error_ang
+
     def calc_vel(self, current_ang, x, y):
         self.current_ang = self._normalize_angle(current_ang)
         self.x = x
@@ -64,54 +106,24 @@ class CalcVelocities:
             (self.x_goal - self.x) ** 2 + (self.y_goal - self.y) ** 2
         )
         if self.paint_circle:
-            current_radius = np.sqrt(
-                (self.x - self.x_mid) ** 2 + (self.y - self.y_mid) ** 2
-            )
-            self.error_radius = self.radius - current_radius
-            self.error_radius_sum += self.error_radius * self.dt
-            self.square_error_radius += self.error_radius**2
-            self.error_radius_deriv = (
-                self.error_radius - self.error_radius_prev
-            ) / self.dt
-            self.error_radius_prev = self.error_radius
-            self.goal_ang = self._goal_angle_circle(
-                self.x_mid, self.y_mid, self.x, self.y
-            )
-            self.error_ang = self.current_ang - self.goal_ang
-            self.error_ang = self._normalize_angle(self.error_ang)
-
-            # Update the linear and angular velocities using the PID controller
-            self.vel_lin = self.max_vel_lin
-            if np.abs(self.error_ang) < self.tol_ang:
-                self.vel_ang = -(
-                    self.Kp_circle * self.error_radius * self.dt
-                    # + self.Ki_circle * self.error_radius_sum
-                    # + self.Kd_circle * self.error_radius_deriv
-                ) / self.radius #normalize to radius
-            else:
-                self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt/self.radius
+            self.calc_radius_velocities()
         else:
-            self.goal_ang = self._goal_angle_line()
-            self.error_ang = self.goal_ang - self.current_ang
-            self.error_ang = (self.error_ang + np.pi) % (2 * np.pi) - np.pi
-            if np.abs(self.error_ang) < self.min_tol_ang:  # to avoid calculatins error
-                self.error_ang = 0
-            self.vel_lin = self.Kp_l * self.error_lin  # slow down when close to goal
-            self.vel_ang = self.Kp_a * self.error_ang
+            self.calc_line_velocities()
 
         self.vel_lin = np.clip(self.vel_lin, -self.max_vel_lin, self.max_vel_lin)
         self.vel_ang = np.clip(self.vel_ang, -self.max_vel_ang, self.max_vel_ang)
         if self._has_reached_goal():
-            print("Goal reached")
+            # print("Goal reached")
             self.vel_lin = 0
             self.vel_ang = 0
-        # self._log_message()
-        if np.abs(self.error_ang) > self.tol_ang:  # dont move if not facing goal
+        self._log_message()
+        if np.abs(self.error_ang) > self.tol_ang:# and not self.has_moved:  # dont move if not facing goal
             self.vel_lin = 0
             if self.has_moved:
                 self.times_above_tol_ang += 1
         else:
             self.has_moved = True
+        # print("vel_lin: ", self.vel_lin, "vel_ang: ", self.vel_ang)
         return self.vel_lin, self.vel_ang
 
     def get_sqaure_error_radius(self):
