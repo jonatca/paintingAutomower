@@ -31,17 +31,53 @@ To run simulation:
 2. Run "cd calculations", then run "python3 simulate.py"
 3. Check you simulated result in calculations/plots/plot-latest.png
 
-To get position run this in terminal "cd 450/src/hrp/am_driver_scripts", then: "rostopic echo /pose"
+To get position run this in terminal "cd 450/src/hrp/am_driver/scripts", then: "rostopic echo /pose"
 To get GPS run this in termrminal: "cd 450/src/hrp/am_driver/scripts", then: "rostopic echo /GPSfix"
 To see all rostopics run this in termrminal: "cd 450/src/hrp/am_driver/scripts", then: "rostopic echo /GPSfix"
 
 
 
-Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/plot_data.py" to plot data 
-Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/simulate.py" to simulate
+SSH
 
+1. Install vscode and the plugin ssh to vscode
+2. Connect to the same wifi as the jetson nano (SSID: CASELAB, Password:CaseLocalNet)
+3. Open ssh extention (bottom left green), connect to host, "ssh kandidatarbete@192.168.1.110"
+4. Open 450/src
 
 To change wifi
 
-1. sudo nmcli device wifi list
-2. sudo nmcli device wifi connect SSID password PASSWORD
+1. sudo nano /etc/netplan/01-network-manager-all.yaml
+2. change to correct wifi, copy one of these:
+
+network:
+  version: 2
+  renderer: networkd
+  wifis:
+    wlan0:
+      dhcp4: no
+      addresses:
+        - 192.168.1.110/24
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+      access-points:
+        "CASELAB":
+          password: "CaseLocalNet"
+
+network:
+  version: 2
+  renderer: networkd
+  wifis:
+    wlan0:
+      dhcp4: no
+      addresses:
+        - 192.168.1.110/24
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+      access-points:
+        "GalaxyS20":
+          password: "12345678"
+
+3. sudo netplan apply
+
