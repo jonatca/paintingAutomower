@@ -35,13 +35,17 @@ To get position run this in terminal "cd 450/src/hrp/am_driver_scripts", then: "
 To get GPS run this in termrminal: "cd 450/src/hrp/am_driver/scripts", then: "rostopic echo /GPSfix"
 To see all rostopics run this in termrminal: "cd 450/src/hrp/am_driver/scripts", then: "rostopic echo /GPSfix"
 
-
-
-Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/plot_data.py" to plot data 
+Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/plot_data.py" to plot data
 Felix: "python /Users/felix/Kandidatarbete_kod/paintingAutomower/calculations/simulate.py" to simulate
-
 
 To change wifi
 
 1. sudo nmcli device wifi list
 2. sudo nmcli device wifi connect SSID password PASSWORD
+
+SSH
+
+1. Install vscode and the plugin ssh to vscode
+2. Connect to the same wifi as the jetson nano (SSID: CASELAB, Password:CaseLocalNet)
+3. Open ssh extention (bottom left green), connect to host, "ssh kandidatarbete@192.168.1.110"
+4. Open 450/src

@@ -166,8 +166,6 @@ def get_paint_order():
 
     #}
     
-    paint_order = [
-        test_circle]
     
     #paint_order = [shortside_down]
     print("paint_order", paint_order)
