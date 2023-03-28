@@ -1,4 +1,4 @@
-# painting_automower
+# painting automower
 
 To change lengths of lines:
 

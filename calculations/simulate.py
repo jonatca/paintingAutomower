@@ -53,9 +53,9 @@ class Simulate:
         self.save_data = save_data
         while not self.reached_goal and self.time_elapsed < self.max_time:
             # calculates new x and y position based on the last velocities and last position
-            position_noise = np.random.normal(loc=0, scale=0.000, size=(2,))
-            vel_noise_lin = np.random.normal(loc=0, scale=0.000, size=(1,))
-            vel_noise_ang = np.random.normal(loc=0, scale=0.000, size=(1,))
+            position_noise = np.random.normal(loc=0, scale=0.0001, size=(2,))
+            vel_noise_lin = np.random.normal(loc=0, scale=0.0001, size=(1,))
+            vel_noise_ang = np.random.normal(loc=0, scale=0.0001, size=(1,))
             self.x += (self.len_vel + vel_noise_lin[0]) * np.cos(self.current_ang) * self.dt + position_noise[0]
             self.y += (self.len_vel + vel_noise_lin[0])* np.sin(self.current_ang) * self.dt + position_noise[1]
             self.current_ang += (self.ang_vel + vel_noise_ang[0]) * self.dt
