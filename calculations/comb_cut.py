@@ -1,12 +1,7 @@
 import sys
 import json
 import os
-#def comb_lines(width, lenght):  # the lines on a soccer field
-#    side = [(0, 0), (width, 0)]
-#    offset = 0.25 # width of comber
-#    #width of one comb is 5.5 m
-#    #hej
-   
+
 #använd egen filepath till userInput
 sys.path.append("/Users/emili/OneDrive/Dokument/GitHub/paintingAutomower/userInput")
 current_file = __file__
@@ -27,41 +22,41 @@ def get_comb_cut_order():
 
     width_combing = lenght / num_comb_lines 
     length_combing = width 
-    width_comb = 0.3
-    num_combs_per_area = width_combing / width_comb
+    width_comb = 0.01
+    num_combs_per_area = int(width_combing / width_comb)
     
     # köra upp på första "ruta" sen ner på andra sen upp på tredje osv. 
     # alternativt upp första ner andra sen upp första igen fast en bredd tidigare
     # minsta antal trips över planen?: (längden på planen / bredden på kammen)
-    # vad göra om ej jämnt delbar bredd på ruta, gå mer överlapp nära kanten
-
-    #def list_of_goals():
-        
-
-    list = []
-    i = 0
-    for k in range(0,num_comb_lines//4):
-        trip = {"start": (0, 0), "end": (width, (k+i)*width_combing), "type": "line"}
-        goto_next = {"start": (width, 0), "end": (width, ((k+i+1)*width_combing)), "type": "line"}
-        trip2 = {"start": (width, ((k+i+1)*width_combing)), "end": (0, ((k+i+1)*width_combing)), "type": "line"}
-        goto_next2 = {"start": (0, ((k+i+1)*width_combing)), "end": (0, ((k+i+2)*width_combing)), "type": "line"}
-        i += 1
-        list.append(trip)
-        list.append(goto_next)
-        list.append(trip2)
-        list.append(goto_next2)
+    # vad göra om ej jämnt delbar bredd på ruta, få mer överlapp nära kanten
     
-    comb_cut_order = list    
-    #first_trip = {"start": (0, 0), "end": (width, 0), "type": "line"}
-    #goto_next1 ={"start": (width, 0), "end": (width, (width_combing)), "type": "line"}
-    #snd_trip = {"start": (width, (width_combing)), "end": (0, (width_combing)), "type": "line"}
-    #goto_next2 = {"start": (0, (width_combing)), "end": (0, (2*width_combing)), "type": "line"}
-    #thrd_trip = {"start": (0, (2*width_combing)), "end": (width, (2*width_combing)), "type": "line"}
+    #Lägga till målpunkter i lista comb_cut_order. loopa målpunkter för
+    #TODO Få det att funka för både udda och jämnt num_comb_lines 
+    comb_cut_order = []
+    for k in range(num_combs_per_area):
+        for i in range(num_comb_lines):
+            if not i % 2:
+                x1_e = 0
+                x2_e = width
+                y1_e = i*width_combing + k*width_comb
+                y2_e = y1_e
+                trip_e = {"start": (x1_e, y1_e), "end": (x2_e, y2_e), "type": "line"}
+                comb_cut_order.append(trip_e)
+                to_next_e = {"start": (x2_e, y2_e), "end": (x2_e, y2_e+width_combing), "type": "line"}
+                comb_cut_order.append(to_next_e)
+            else:
+                x1_o = width
+                x2_o = 0
+                y1_o = i*width_combing + k*width_comb
+                y2_o = y1_o
+                trip_o = {"start": (x1_o, y1_o), "end": (x2_o, y2_o), "type": "line"}
+                comb_cut_order.append(trip_o)
+                if i != (num_comb_lines-1):
+                    to_next_o = {"start": (x2_o, y2_o), "end": (x2_o, y2_o+width_combing), "type": "line"}
+                    comb_cut_order.append(to_next_o)
+                else:
+                    to_start = {"start": (x2_o, y2_o), "end": (0, 0+k*width_comb), "type": "line"}
+                    comb_cut_order.append(to_start)
+
     
-    #comb_cut_order = [first_trip, 
-     #                 goto_next1,
-      #                snd_trip,
-      #                goto_next2,
-      #                thrd_trip
-      #                ]
     return comb_cut_order
