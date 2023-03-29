@@ -35,7 +35,8 @@ class Drive_to:
             "lon_start": [],
             "angle_north": [],
             "angle_north_init": [],
-            "covariance": []
+            "covariance": [],
+            "angle": [],
         }
         self.x = None 
         self.y = None
@@ -133,6 +134,7 @@ class Drive_to:
         if self.store_data:
             self.data["x"].append(self.x)
             self.data["y"].append(self.y)
+            self.data["angle"].append(current_ang)
         # if close to goal, cahnge goal
         if lin_vel == 0.0 and ang_vel == 0.0:
             change_goal(self)
