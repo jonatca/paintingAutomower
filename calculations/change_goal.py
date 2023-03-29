@@ -6,11 +6,11 @@ def change_goal(self, simulation = False):
         self.calc_velocities.not_in_circle()
         if "end" in self.order[0]:
             _handle_end(self)
+            _update_data(self, simulation)
         elif "after_end" in self.order[0]:
             _handle_after_end(self, simulation)
         else:
             _handle_no_end(self, simulation)
-        _update_data(self, simulation)
         # _print_progress(self)
     else:
         self.reached_goal = True
@@ -43,7 +43,7 @@ def _update_data(self, simulation):
     if not simulation:
         self.x_goal, self.y_goal = change_coord_sys(self, self.x_goal, self.y_goal)
         if self.drive_in_circle:
-            self.x_mid, self.y_mid = change_coord_sys(self.x_mid, self.y_mid, self.x_start, self.y_start, self.init_angle) 
+            self.x_mid, self.y_mid = change_coord_sys(self, self.x_mid, self.y_mid)
     self.data["x_goal"].append(self.x_goal)
     self.data["y_goal"].append(self.y_goal)
     if self.drive_in_circle:
