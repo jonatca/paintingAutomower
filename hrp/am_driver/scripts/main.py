@@ -73,8 +73,8 @@ class Drive_to:
         self.data["lon"].append(fix.longitude)
         self.data["angle_north"].append(0)
         self.data["covariance"].append(fix.position_covariance)
-        print(fix.latitude, fix.longitude, "gps")
-        print(x_gps, y_gps, "gps, converted to xy")
+        # print(fix.latitude, fix.longitude, "gps")
+        # print(x_gps, y_gps, "gps, converted to xy")
 
     def convert_to_xy(self, lat, lon, lat_start, lon_start):
         x = (lat - lat_start) * 111139
@@ -102,7 +102,7 @@ class Drive_to:
         if self.store_data:  
             with open(filename, "w") as json_file:
                 json.dump(self.data, json_file)
-            plot_data(filename)
+            plot_data(GPS = True, filename = filename)
         rospy.loginfo(
             "Automower has moved to position x=%s, y=%s",
             round(self.x, 2),

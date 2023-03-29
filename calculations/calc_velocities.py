@@ -78,7 +78,7 @@ class CalcVelocities:
 
         theoretical_ang_vel = -self.max_vel_lin / self.radius
         self.vel_lin = self.max_vel_lin
-        print(self.error_ang)
+        # print(self.error_ang)
         if np.abs(self.error_ang) < self.tol_ang:
             self.vel_ang = theoretical_ang_vel - self.Kp_circle * self.error_radius * self.dt
                 # + self.Ki_circle * self.error_radius_sum
@@ -116,7 +116,7 @@ class CalcVelocities:
             # print("Goal reached")
             self.vel_lin = 0
             self.vel_ang = 0
-        self._log_message()
+        # self._log_message()
         if np.abs(self.error_ang) > self.tol_ang:# and not self.has_moved:  # dont move if not facing goal
             self.vel_lin = 0
             if self.has_moved:
