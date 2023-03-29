@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-
+import pyproj
 sys.path.append("/home/kandidatarbete/450/src/calculations")
 import json
 import matplotlib
@@ -27,8 +27,18 @@ def inv_change_coord_sys(x_goal, y_goal,x_start, y_start, init_angle):  # global
     return x_goal_prim, y_goal_prim  # automowers relative coordinates
 
 def convert_to_xy(lat, lon, lat_start, lon_start):
-    x = (lat - lat_start) * 111139
-    y = (lon - lon_start) * 111139
+    # Define the coordinate reference system for WGS84
+    wgs84 = pyproj.CRS("EPSG:4326")
+    # Define the coordinate reference system for SWEREF99 TM
+    sweref = pyproj.CRS("EPSG:3006")
+    transformer = pyproj.Transformer.from_crs(wgs84, sweref, always_xy=True)
+    x_start, y_start = transformer.transform(lon_start, lat_start)
+    x, y = transformer.transform(lon, lat)
+    x -= x_start
+    y -= y_start
+
+    #x = (lat - lat_start) * 111139
+    #y = (lon - lon_start) * 111139
     return x, y 
 
 def convert_to_xy2(lat_start, lon_start, lat, lon, x_start, y_start, angle_start):
