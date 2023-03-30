@@ -31,7 +31,7 @@ def get_paint_order():
     longside_right = {"end": (width, lenght), "type": "line"}
     shortside_up = {"end": (0, lenght), "type": "line"}
     longside_left = {"end": (0, 0), "type": "line"}
-    line_to_penalty_area_right_1 = {"after_end": (width / 2 - penalty_area_width / 2, 0), "type": "line"}
+    line_to_penalty_area_right_1 = {"end": (width / 2 - penalty_area_width / 2, 0), "type": "line"}
     line_to_goal_box_right_1 = {"end": (width / 2 + goal_box_width / 2, 0), "type": "line"}
     line_to_penalty_dot_right = {"end": (width / 2, penalty_dot_length), "type": "line"}
     line_to_circle_penalty_area_right = {"end": (width / 2 +  penalty_arc_radius/2, penalty_area_height), "type": "line"}
