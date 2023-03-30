@@ -27,40 +27,56 @@ def get_paint_order():
     penalty_arc_radius = round(float(user_input["penaltyArcRadius"]), 4)
     num_comb_lines = round(float(user_input["numCombLines"]), 4)
 
-    shortside_down = {"end": (width, 0),"after_end": turn270flag(width,0,'x'), "type": "line"}
-    longside_right = {"end": (width, lenght),"after_end": turn270flag(width,lenght,'y'), "type": "line"}
-    shortside_up = {"end": (0, lenght),"after_end": turn270flag(0,lenght,'-x'), "type": "line"}
-    longside_left = {"end": (0, 0),"after_end": turn270flag(0,0,'-y'), "type": "line"}
-    midline = {"start": (0, lenght / 2), "end": (width, lenght / 2), "type": "line"}
+    shortside_down = {"end": (width, 0),"after_end": turn270(width,0,'x'), "type": "line"}
+    longside_right = {"end": (width, lenght), "type": "line"}
+    shortside_up = {"end": (0, lenght), "type": "line"}
+    longside_left = {"end": (0, 0), "type": "line"}
+    line_to_penalty_area_right_1 = {"after_end": (width / 2 - penalty_area_width / 2, 0), "type": "line"}
+    line_to_goal_box_right_1 = {"end": (width / 2 + goal_box_width / 2, 0), "type": "line"}
+    line_to_penalty_dot_right = {"end": (width / 2, penalty_dot_length), "type": "line"}
+    line_to_circle_penalty_area_right = {"end": (width / 2 +  penalty_arc_radius/2, penalty_area_height), "type": "line"}
+    line_to_circle_penalty_area_right2 = {"end": (width / 2 -  penalty_arc_radius/2, penalty_area_height), "type": "line"}
+    line_to_midline = {"end": (0, lenght/2), "type": "line"}
+    midline_dot = {"start": (0, lenght/2), "end": (width/2, lenght / 2), "type": "line"}
+    midline_rest = {"start": (width/2, lenght / 2), "end": (width, lenght / 2), "type": "line"}
+    line_to_mid_circle = { "end": (width/2 + center_circle_diameter, lenght / 2), "type": "line" }
+    line_to_penalty_area_left = { "end": (width/2 + penalty_area_width/2, lenght - penalty_area_height), "type": "line" }
+    line_to_goal_box_left2 = { "end": (width / 2 + goal_box_width / 2, lenght),"type": "line" }
+    line_to_penalty_area_left2 = { "end": (width / 2 - penalty_area_width / 2, lenght),"type": "line" }
+    line_to_circle_penalty_area_left = {"end": (width / 2 +  penalty_arc_radius/2, lenght - penalty_area_height), "type": "line"}
+    line_to_circle_penalty_area_left2 = {"end": (width / 2 -  penalty_arc_radius/2, lenght - penalty_area_height), "type": "line"}
+    line_to_penalty_dot_left = {"end": (width / 2, lenght - penalty_dot_length), "type": "line"}
+   
+   
     goal_box_right_1 = {
-        "start": (width / 2 - goal_box_width / 2, 0),
-        "end": (width / 2 - goal_box_width / 2, goal_box_height),
+        "start": (width / 2 - goal_box_width / 2, goal_box_height),
+        "end": (width / 2 - goal_box_width / 2, 0),
         "type": "line",
     }
     # change y to x
     goal_box_right_2 = {
-        "start": (width / 2 - goal_box_width / 2, goal_box_height),
-        "end": (width / 2 + goal_box_width / 2, goal_box_height),
+        "start": (width / 2 + goal_box_width / 2, goal_box_height),
+        "end": (width / 2 - goal_box_width / 2, goal_box_height),
         "type": "line",
     }
     goal_box_right_3 = {
-        "start": (width / 2 + goal_box_width / 2, goal_box_height),
-        "end": (width / 2 + goal_box_width / 2, 0),
+        "start": (width / 2 + goal_box_width / 2, 0),
+        "end": (width / 2 + goal_box_width / 2, goal_box_height),
         "type": "line",
     }
     goal_box_left_1 = {
-        "start": (width / 2 - goal_box_width / 2, lenght),
-        "end": (width / 2 - goal_box_width / 2, lenght - goal_box_height),
+        "start": (width / 2 - goal_box_width / 2, lenght- goal_box_height),
+        "end": (width / 2 - goal_box_width / 2, lenght),
         "type": "line",
     }
     goal_box_left_2 = {
-        "start": (width / 2 - goal_box_width / 2, lenght - goal_box_height),
-        "end": (width / 2 + goal_box_width / 2, lenght - goal_box_height),
+        "start": (width / 2 + goal_box_width / 2, lenght - goal_box_height),
+        "end": (width / 2 - goal_box_width / 2, lenght - goal_box_height),
         "type": "line",
     }
     goal_box_left_3 = {
-        "start": (width / 2 + goal_box_width / 2, lenght - goal_box_height),
-        "end": (width / 2 + goal_box_width / 2, lenght),
+        "start": (width / 2 + goal_box_width / 2, lenght),
+        "end": (width / 2 + goal_box_width / 2, lenght- goal_box_height),
         "type": "line",
     }
     penalty_area_right_1 = {
@@ -94,11 +110,12 @@ def get_paint_order():
         "type": "line",
     }
     center_circle = {
-        "start": (width / 2 - center_circle_diameter / 2, lenght / 2),
-        "end": (width / 2 + center_circle_diameter / 2, lenght / 2),
+        "start": (width / 2 + center_circle_diameter / 2, lenght / 2),
+        "end": (width / 2 - center_circle_diameter / 2, lenght / 2),
         "center": (width / 2, lenght / 2),
         "radius": center_circle_diameter / 2,
         "type": "circle",
+        "direction": "positive"
     }
     corner_arc_right_up = {
         "start": (lenght - corner_arc_radius, 0),
@@ -113,6 +130,7 @@ def get_paint_order():
         "center": (lenght, width),
         "radius": corner_arc_radius,
         "type": "circle",
+        
     }
     corner_arc_left_up = {
         "start": (0, corner_arc_radius),
@@ -142,9 +160,38 @@ def get_paint_order():
         longside_right,
         shortside_up,
         longside_left,
-        #midline,
-        #goal_box_right_2,
-        #goal_box_right_3,
+        line_to_penalty_area_right_1,
+        penalty_area_right_1,
+        penalty_area_right_2,
+        penalty_area_right_3,
+        line_to_goal_box_right_1,
+        goal_box_right_3,
+        goal_box_right_2,
+        goal_box_right_1,
+        line_to_penalty_dot_right,
+        line_to_circle_penalty_area_right,
+        line_to_circle_penalty_area_right2,
+        line_to_midline,
+        midline_dot,
+        midline_rest,
+        line_to_mid_circle,
+        #center_circle,
+        line_to_penalty_area_left,
+        penalty_area_left_3,
+        line_to_goal_box_left2,
+        goal_box_left_3,
+        goal_box_left_2,
+        goal_box_left_1,
+        line_to_penalty_area_left2,
+        penalty_area_left_1,
+        penalty_area_left_2,
+        line_to_circle_penalty_area_left,
+        line_to_circle_penalty_area_left2,
+        line_to_penalty_dot_left
+
+
+
+        
         #goal_box_left_1,
         #goal_box_left_2,
         #goal_box_left_3,
