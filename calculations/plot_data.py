@@ -26,6 +26,26 @@ def inv_change_coord_sys(x_goal, y_goal,x_start, y_start, init_angle):  # global
     )
     return x_goal_prim, y_goal_prim  # automowers relative coordinates
 
+def inverse_change_coord_sys(x_local, y_local, x_start, y_start, init_angle):
+    x_global = x_start + x_local * np.cos(init_angle) + y_local * np.sin(init_angle)
+    y_global = y_start - x_local * np.sin(init_angle) + y_local * np.cos(init_angle)
+    return x_global, y_global
+
+def change_coord_sys(
+    x_goal_prim, y_goal_prim, x_start, y_start, init_angle
+):  # automowers relative coordinates => global coordinates
+    x_goal = (
+        x_start
+        + x_goal_prim * np.cos(init_angle)
+        - y_goal_prim * np.sin(init_angle)
+    )
+    y_goal = (
+        y_start
+        + x_goal_prim * np.sin(init_angle)
+        + y_goal_prim * np.cos(init_angle)
+    )
+    return x_goal, y_goal  # automowers global coordinates
+
 def convert_to_xy(lat, lon, lat_start, lon_start):
     # Define the coordinate reference system for WGS84
     wgs84 = pyproj.CRS("EPSG:4326")
@@ -70,6 +90,7 @@ def plot_data(GPS=True, filename="data.json"):
     )  # Set the backend to Agg (non-interactive) to avoid display errors
     with open(filename, "r") as json_file:
         data = json.load(json_file)
+    print(filename)
     x = data["x"]
     y = data["y"]
     x_start = x[0]
@@ -81,19 +102,38 @@ def plot_data(GPS=True, filename="data.json"):
     # for i in range(len(x)):
         # x[i],y[i] = inv_change_coord_sys(x[i], y[i] ,x_start, y_start, angle_start)
     angle_start = np.arctan2(np.mean(y[0:70]) - y[0], np.mean(x[0:70]) - x[0])
+    angle_north = -np.pi/2
     print(angle_start, "angle_start2")
     if GPS:
-        x_gps = data["x_gps"]
-        y_gps = data["y_gps"]
+        # x_gps = data["x_gps"]
+        # y_gps = data["y_gps"]
+        x_gps = np.zeros(len(data["lat"]))
+        y_gps = np.zeros(len(data["lat"]))
         lat = data["lat"]
         lon = data["lon"]
         lat_start = data["lat_start"][0]
         lon_start = data["lon_start"][0]
-        print(angle_start)
+        # x_gps[0], y_gps[0] = convert_to_xy(lat[0], lon[0], 0, 0)
+        x_gps_start, y_gps_start = lat_lon_to_cartesian(lat[0], lon[0])
+        delta_x, delta_y = lat_lon_to_cartesian(lat[0], 90 - lon[0])
+        y_north_angle = np.arctan2(delta_x, delta_y)
+        print(y_north_angle * 180/np.pi, "y_north_angle")
+        angle = np.pi/2 - angle_north + y_north_angle 
+        x_gps_start, y_gps_start = inverse_change_coord_sys(x_gps_start, y_gps_start, 0, 0, angle)
         for i in range(len(lat)):
-            x_gps[i], y_gps[i] = convert_to_xy2(lat[i], lon[i], lat_start, lon_start, x_start, y_start, angle_start)
-            x_gps[i], y_gps[i] = convert_to_xy(lat[i], lon[i], lat_start, lon_start)
+            # x_gps[i], y_gps[i] = convert_to_xy2(lat[i], lon[i], lat_start, lon_start, x_start, y_start, angle_start)
+            # x_gps[i], y_gps[i] = convert_to_xy(lat[i], lon[i], lat_start, lon_start)
+            # x_gps[i], y_gps[i] = lat_lon_to_cartesian(lat[i], lon[i])
+
             x_gps[i], y_gps[i] = lat_lon_to_cartesian(lat[i], lon[i])
+            print(x_gps[i], y_gps[i], "x_gps[i], y_gps[i]")
+            print(x_gps_start, y_gps_start, "x_gps_start, y_gps_start")
+            print(x_gps[i] - x_gps_start, y_gps[i] - y_gps_start, "x_gps[i] - x_gps_start, y_gps[i] - y_gps_start")
+            x_gps[i], y_gps[i] = inverse_change_coord_sys(x_gps[i], y_gps[i],x_gps_start, y_gps_start, angle)
+
+            # x_gps[i], y_gps[i] -= x_gps_start, y_gps_start # type: ignore
+            # x_gps[i] -= x_gps_start 
+            # y_gps[i] -= y_gps_start 
     try:
         radius = data["radius"][0]
         x_mid = data["x_mid"][0]
@@ -107,16 +147,24 @@ def plot_data(GPS=True, filename="data.json"):
     # plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
     if GPS:
         plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
-    print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
-    plt.xlabel("x")
-    plt.ylabel("y")
+    # print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
+    plt.xlabel("x ")
+    plt.ylabel("y ")
     plt.title("Path and Goal")
     plt.legend()
     plt.axis("equal")
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     timestamp = int(timestamp.replace("-", ""))
+
+    # formatter = plt.FuncFormatter(lambda x, pos: f'{x / 10**6:.0f}') # type: ignore
+    # plt.gca().xaxis.set_major_formatter(formatter)
+    # plt.gca().yaxis.set_major_formatter(formatter)
+
+    # # Set x and y axis limits
+    # plt.xlim(2 * 10**5, 2 * 10**7)
+    # plt.ylim(2 * 10**5, 2 * 10**7)
     plt.savefig("plots/plot-latest.png")
-    plt.savefig("plots/plot-%d.png" % timestamp)
+    # plt.savefig("plots/plot-%d.png" % timestamp)
     print("Saved plot to plots/plot-", {timestamp}, ".png")
 
 
