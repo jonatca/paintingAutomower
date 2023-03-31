@@ -22,7 +22,7 @@ def get_comb_cut_order():
 
     width_combing = lenght / num_comb_lines 
     length_combing = width 
-    width_comb = 0.01
+    width_comb = 0.3
     num_combs_per_area = int(width_combing / width_comb)
     
     # köra upp på första "ruta" sen ner på andra sen upp på tredje osv. 
