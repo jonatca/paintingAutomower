@@ -10,7 +10,7 @@ sibling_dir = os.path.join(parent_dir, "userInput")
 child_file = os.path.join(sibling_dir, "paintDimension.json")
 child_file_rel = os.path.relpath(child_file, current_file)
 
-
+#after_end = turn270flag(width, 0, 'x') + [line1] + turn270()
 # This file can only be exceuted from the calculations directory or by rosrun am_driver main.py
 def get_paint_order():
     with open(child_file_rel) as paintDimensions:
@@ -160,34 +160,34 @@ def get_paint_order():
         longside_right,
         shortside_up,
         longside_left,
-        line_to_penalty_area_right_1,
-        penalty_area_right_1,
-        penalty_area_right_2,
-        penalty_area_right_3,
-        line_to_goal_box_right_1,
-        goal_box_right_3,
-        goal_box_right_2,
-        goal_box_right_1,
-        line_to_penalty_dot_right,
-        line_to_circle_penalty_area_right,
-        line_to_circle_penalty_area_right2,
-        line_to_midline,
-        midline_dot,
-        midline_rest,
-        line_to_mid_circle,
-        #center_circle,
-        line_to_penalty_area_left,
-        penalty_area_left_3,
-        line_to_goal_box_left2,
-        goal_box_left_3,
-        goal_box_left_2,
-        goal_box_left_1,
-        line_to_penalty_area_left2,
-        penalty_area_left_1,
-        penalty_area_left_2,
-        line_to_circle_penalty_area_left,
-        line_to_circle_penalty_area_left2,
-        line_to_penalty_dot_left
+        # line_to_penalty_area_right_1,
+        # penalty_area_right_1,
+        # penalty_area_right_2,
+        # penalty_area_right_3,
+        # line_to_goal_box_right_1,
+        # goal_box_right_3,
+        # goal_box_right_2,
+        # goal_box_right_1,
+        # line_to_penalty_dot_right,
+        # line_to_circle_penalty_area_right,
+        # line_to_circle_penalty_area_right2,
+        # line_to_midline,
+        # midline_dot,
+        # midline_rest,
+        # line_to_mid_circle,
+        # #center_circle,
+        # line_to_penalty_area_left,
+        # penalty_area_left_3,
+        # line_to_goal_box_left2,
+        # goal_box_left_3,
+        # goal_box_left_2,
+        # goal_box_left_1,
+        # line_to_penalty_area_left2,
+        # penalty_area_left_1,
+        # penalty_area_left_2,
+        # line_to_circle_penalty_area_left,
+        # line_to_circle_penalty_area_left2,
+        # line_to_penalty_dot_left
 
 
 
