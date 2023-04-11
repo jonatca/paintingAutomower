@@ -59,7 +59,7 @@ class CalcVelocities:
         self.max_vel_lin = 0.3
         self.tol_ang = 7 * np.pi/180
 
-    def calc_radius_velocities(self):
+    def calc_radius_velocities(self): #kolla på o försök göra om 
         current_radius = np.sqrt(
             (self.x - self.x_mid) ** 2 + (self.y - self.y_mid) ** 2
         )
