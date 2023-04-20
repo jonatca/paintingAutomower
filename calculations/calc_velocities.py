@@ -3,7 +3,7 @@ import numpy as np
 
 class CalcVelocities:
     def __init__(self, Kp_circle=0, Kp90_circle=16.27): 
-        self.tol_lin = 0.05  # tolerance in meter
+        self.tol_lin = 0.1  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
         self.max_vel_lin = 0.3

@@ -27,7 +27,7 @@ def get_paint_order():
     penalty_arc_radius = round(float(user_input["penaltyArcRadius"]), 4)
     num_comb_lines = round(float(user_input["numCombLines"]), 4)
 
-    shortside_down = {"end": (width, 0),"after_end": turn270(width,0,'x'), "type": "line"}
+    shortside_down = {"end": (width, 0),"after_end": turn270flag(width,0,'x'), "type": "line"}
     longside_right = {"end": (width, lenght), "type": "line"}
     shortside_up = {"end": (0, lenght), "type": "line"}
     longside_left = {"end": (0, 0), "type": "line"}
