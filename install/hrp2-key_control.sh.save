@@ -1,0 +1,35 @@
+source /opt/ros/galactic/setup.bash
+source /home/GMEO/paintingAutomower/install/local_setup.bas    def pose_callback(self, pose):
+        z_dir = pose.pose.orientation.z
+        w_dir = pose.pose.orientation.w
+        current_ang = tf.transformations.euler_from_quaternion([0, 0, z_dir, w_dir])[2]
+        if (
+            self.reset_angle
+            and self.init_angle is None
+            and self.x_start is None
+            and self.y_start is None
+        ):
+            self.init_angle = current_ang
+            self.x_start = pose.pose.position.x
+            self.y_start = pose.pose.position.y
+            self.calc_velocities = CalcVelocities(self.update_freq)
+            change_goal(self)  # sets initial goal/
+
+        self.x = pose.pose.position.x
+        self.y = pose.pose.position.y
+        lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
+        self.twist.linear.x = lin_vel
+        self.twist.angular.z = ang_vel
+        if self.store_data:
+            self.data["x"].append(self.x)
+            self.data["y"].append(self.y)
+            self.data["angle"].append(current_ang)
+        # if close to goal, cahnge goal
+        if lin_vel == 0.0 and ang_vel == 0.0:
+            change_goal(self)
+
+    def ctrlc_shutdown(self, sig, frame):
+        self.stop()
+        rospy.signal_shutdown("User interrupted by ctrl+c")h
+
+python3 ~/paintingAutomower/install/lib/python3.8/site-packages/hqv_keyboard_remote_drive/keyboard_remote_drive_node.py
