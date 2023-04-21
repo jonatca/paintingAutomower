@@ -50,7 +50,7 @@ class CalcVelocities:
             self.Kp_circle = np.abs(self.Kp_circle)
             self.Ki_circle = np.abs(self.Ki_circle)
             self.Kd_circle = np.abs(self.Kd_circle)
-            self.Kp90_circle = np.abs(self.Kp90_circle)
+            self.Kp90_circle = -np.abs(self.Kp90_circle)
         self.paint_circle = True
         self.max_vel_lin = 0.2
         if self.radius > 5.: #by test, kp circle is too high for big circles
