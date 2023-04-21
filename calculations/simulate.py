@@ -9,9 +9,9 @@ from change_goal import change_goal
 class Simulate:
     def __init__(self, calc_velocities=None):
         self.max_time = 3000000
-        #paint_order = get_paint_order()
-        comb_cut_order = get_comb_cut_order()
-        self.order = comb_cut_order # välj om comb_cut eller paint order
+        paint_order = get_paint_order()
+        # comb_cut_order = get_comb_cut_order()
+        self.order = paint_order # valj om comb_cut eller paint order
         self.tot_num_lines = len(self.order)
         self.update_freq = 10  # Hz but doesn't work? stuck at 10 Hz
 
@@ -67,7 +67,7 @@ class Simulate:
             if self.len_vel == 0 and self.ang_vel == 0:
                 change_goal(self, simulation=True)
             self.time_elapsed += self.dt
-            if i % 2000== 0 and save_data: #to plot every 2 seconds
+            if i % 200000== 0 and save_data: #to plot every 2 seconds
                 self.stop()
             i+=1
         if save_data:

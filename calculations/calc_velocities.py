@@ -2,8 +2,8 @@ import numpy as np
 
 
 class CalcVelocities:
-    def __init__(self, Kp_circle=0, Kp90_circle=16.27): 
-        self.tol_lin = 0.05  # tolerance in meter
+    def __init__(self, Kp_circle=-206.5510399, Ki_circle=-18.7532926, Kd_circle=-14.2643917, Kp90_circle=-45.9726824): 
+        self.tol_lin = 0.02  # tolerance in meter
         self.tol_ang = 7 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
         self.max_vel_lin = 0.3
@@ -12,8 +12,8 @@ class CalcVelocities:
         self.Kp_a = 1.0
         self.Kp90_circle = Kp90_circle 
         self.Kp_circle = Kp_circle 
-        # self.Ki_circle = Ki_circle 
-        # self.Kd_circle = Kd_circle 
+        self.Ki_circle = Ki_circle 
+        self.Kd_circle = Kd_circle 
         self.error_radius = 0
         self.error_radius_sum = 0
         self.error_radius_prev = 0
@@ -59,7 +59,8 @@ class CalcVelocities:
         self.max_vel_lin = 0.3
         self.tol_ang = 7 * np.pi/180
 
-    def calc_radius_velocities(self): #kolla på o försök göra om 
+
+    def calc_radius_velocities(self):
         current_radius = np.sqrt(
             (self.x - self.x_mid) ** 2 + (self.y - self.y_mid) ** 2
         )
@@ -76,18 +77,15 @@ class CalcVelocities:
         self.error_ang = self.current_ang - self.goal_ang
         self.error_ang = self._normalize_angle(self.error_ang)
 
-        theoretical_ang_vel = -self.max_vel_lin / self.radius
         self.vel_lin = self.max_vel_lin
-        # print(self.error_ang)
         if np.abs(self.error_ang) < self.tol_ang:
-            self.vel_ang = theoretical_ang_vel - self.Kp_circle * self.error_radius * self.dt
-                # + self.Ki_circle * self.error_radius_sum
-                # + self.Kd_circle * self.error_radius_deriv
+            self.vel_ang = -(
+                self.Kp_circle * self.error_radius * self.dt
+                + self.Ki_circle * self.error_radius_sum
+                + self.Kd_circle * self.error_radius_deriv
+            ) / self.radius
         else:
-            self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt/self.radius
-                # + self.Ki_circle * self.error_radius_sum
-                # + self.Kd_circle * self.error_radius_deriv
-        # print("theoretical_ang_vel: ", theoretical_ang_vel)
+            self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt / self.radius
 
     def calc_line_velocities(self):
         self.goal_ang = self._goal_angle_line()
@@ -113,17 +111,14 @@ class CalcVelocities:
         self.vel_lin = np.clip(self.vel_lin, -self.max_vel_lin, self.max_vel_lin)
         self.vel_ang = np.clip(self.vel_ang, -self.max_vel_ang, self.max_vel_ang)
         if self._has_reached_goal():
-            # print("Goal reached")
             self.vel_lin = 0
             self.vel_ang = 0
-        # self._log_message()
-        if np.abs(self.error_ang) > self.tol_ang:# and not self.has_moved:  # dont move if not facing goal
+        if np.abs(self.error_ang) > self.tol_ang:
             self.vel_lin = 0
             if self.has_moved:
                 self.times_above_tol_ang += 1
         else:
             self.has_moved = True
-        # print("vel_lin: ", self.vel_lin, "vel_ang: ", self.vel_ang)
         return self.vel_lin, self.vel_ang
 
     def get_sqaure_error_radius(self):
