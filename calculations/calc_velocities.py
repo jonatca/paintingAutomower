@@ -85,7 +85,7 @@ class CalcVelocities:
                 + self.Kd_circle * self.error_radius_deriv
             ) / self.radius
         else:
-            self.vel_ang = -self.Kp90_circle * self.error_ang * self.dt / self.radius
+            self.vel_ang = self.Kp90_circle * self.error_ang * self.dt / self.radius
 
     def calc_line_velocities(self):
         self.goal_ang = self._goal_angle_line()
