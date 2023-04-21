@@ -39,7 +39,7 @@ class Simulate:
         else:
             self.calc_velocities = calc_velocities
         change_goal(self, simulation=True)
-        self.dt = 1 / self.update_freq
+        self.dt = 1. / self.update_freq
         self.time_elapsed = 0
 
     def get_square_error(self):

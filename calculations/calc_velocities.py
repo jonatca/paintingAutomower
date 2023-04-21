@@ -3,9 +3,9 @@ import numpy as np
 
 class CalcVelocities:
     def __init__(self, Kp_circle=-206.5510399, Ki_circle=-18.7532926, Kd_circle=-14.2643917, Kp90_circle=-45.9726824): 
-        self.tol_lin = 0.02  # tolerance in meter
-        self.tol_ang = 7 * np.pi / 180
-        self.min_tol_ang = 0.1 * np.pi / 180  # to avoid calculations error
+        self.tol_lin = 0.1  # tolerance in meter
+        self.tol_ang = 7. * np.pi / 180
+        self.min_tol_ang = 0.1 * np.pi / 180.  # to avoid calculations error
         self.max_vel_lin = 0.3
         self.max_vel_ang = 0.8
         self.Kp_l = 0.9
@@ -19,7 +19,7 @@ class CalcVelocities:
         self.error_radius_prev = 0
         self.x_goal = None  # global coordinates
         self.y_goal = None
-        update_freq = 10
+        update_freq = 10.
         self.dt = 1.0 / update_freq
         self.current_ang = None
         self.error_lin = None
@@ -47,9 +47,9 @@ class CalcVelocities:
         self.dir = np.pi if dir == "negative" else 0
         self.paint_circle = True
         self.max_vel_lin = 0.2
-        if self.radius > 5: #by test, kp circle is too high for big circles
+        if self.radius > 5.: #by test, kp circle is too high for big circles
             self.Kp_circle = self.Kp_circle/2
-        self.tol_ang = 7 * np.pi/180
+        self.tol_ang = 7. * np.pi/180
 
     def not_in_circle(self):
         self.radius = None
@@ -57,7 +57,7 @@ class CalcVelocities:
         self.y_mid = None
         self.paint_circle = False
         self.max_vel_lin = 0.3
-        self.tol_ang = 7 * np.pi/180
+        self.tol_ang = 7. * np.pi/180
 
 
     def calc_radius_velocities(self):
@@ -119,6 +119,7 @@ class CalcVelocities:
                 self.times_above_tol_ang += 1
         else:
             self.has_moved = True
+        self._log_message()
         return self.vel_lin, self.vel_ang
 
     def get_sqaure_error_radius(self):
