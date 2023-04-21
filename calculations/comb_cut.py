@@ -2,7 +2,6 @@ import sys
 import json
 import os
 
-#använd egen filepath till userInput
 sys.path.append("/Users/emili/OneDrive/Dokument/GitHub/paintingAutomower/userInput")
 current_file = __file__
 parent_dir = os.path.dirname(current_file)
@@ -25,13 +24,6 @@ def get_comb_cut_order():
     width_comb = 0.3
     num_combs_per_area = int(width_combing / width_comb)
     
-    # köra upp på första "ruta" sen ner på andra sen upp på tredje osv. 
-    # alternativt upp första ner andra sen upp första igen fast en bredd tidigare
-    # minsta antal trips över planen?: (längden på planen / bredden på kammen)
-    # vad göra om ej jämnt delbar bredd på ruta, få mer överlapp nära kanten
-    
-    #Lägga till målpunkter i lista comb_cut_order. loopa målpunkter för
-    #TODO Få det att funka för både udda och jämnt num_comb_lines 
     comb_cut_order = []
     for k in range(num_combs_per_area):
         for i in range(num_comb_lines):

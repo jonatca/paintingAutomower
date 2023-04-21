@@ -156,10 +156,11 @@ def get_paint_order():
 
 
     paint_order = [
+        # test_circle
         shortside_down,
-        longside_right,
-        shortside_up,
-        longside_left,
+        # longside_right,
+        # shortside_up,
+        # longside_left,
         # line_to_penalty_area_right_1,
         # penalty_area_right_1,
         # penalty_area_right_2,
