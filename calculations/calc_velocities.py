@@ -39,7 +39,6 @@ class CalcVelocities:
         self.radius = radius
         self.x_mid = x_mid
         self.y_mid = y_mid
-        self.Kp_circle = np.abs(self.Kp_circle)
         if dir == "negative":
             self.dir = np.pi
             self.Kp_circle = np.abs(self.Kp_circle) *-1
@@ -126,7 +125,6 @@ class CalcVelocities:
                 self.times_above_tol_ang += 1
         else:
             self.has_moved = True
-        self._log_message()
         return self.vel_lin, self.vel_ang
 
     def get_sqaure_error_radius(self):
