@@ -1,5 +1,5 @@
 import numpy as np
-# from lqr import LQR
+from lqr import LQR
 
 class CalcVelocities:
     def __init__(self, Kp_circle=-206.5510399, Ki_circle=-18.7532926, Kd_circle=-14.2643917, Kp90_circle=-45.9726824): 
@@ -34,7 +34,7 @@ class CalcVelocities:
         self.times_above_tol_ang = 0
         self.has_moved = False
         self.dir = 1
-        # self.lqr=LQR([self.x, self.y, self.current_ang], [0.0])  #fixa sen
+        self.lqr=LQR([self.x, self.y, self.current_ang], [0.0])  #fixa sen
     def set_circle_params(self, radius, x_mid, y_mid, dir):
         self.radius = radius
         self.x_mid = x_mid
