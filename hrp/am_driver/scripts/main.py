@@ -14,6 +14,7 @@ from calc_velocities import CalcVelocities
 from paint import get_paint_order
 from plot_data import plot_data
 from change_goal import change_goal
+from coord_sys_trans import *
 import datetime
 class Drive_to:
     def __init__(self, reset_angle=True):
@@ -59,6 +60,8 @@ class Drive_to:
         self.gps_sub = rospy.Subscriber("/GPSfix", NavSatFix, self.gps_callback)
         self.rate = rospy.Rate(self.update_freq) 
         self.order = get_paint_order()
+        self.angle_north = 0
+
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -73,7 +76,9 @@ class Drive_to:
         self.data["lat"].append(fix.latitude)
         self.data["lon"].append(fix.longitude)
         self.data["angle_north"].append(0)
+        self.angle_north = 0
         self.data["covariance"].append(fix.position_covariance)
+        #TODO update kalman gps
         # print(fix.latitude, fix.longitude, "gps")
         # print(x_gps, y_gps, "gps, converted to xy")
 
@@ -111,33 +116,36 @@ class Drive_to:
         )
 
     def pose_callback(self, pose):
-        z_dir = pose.pose.orientation.z
-        w_dir = pose.pose.orientation.w
-        current_ang = tf.transformations.euler_from_quaternion([0, 0, z_dir, w_dir])[2]
-        if (
-            self.reset_angle
-            and self.init_angle is None
-            and self.x_start is None
-            and self.y_start is None
-        ):
-            self.init_angle = current_ang
-            self.x_start = pose.pose.position.x
-            self.y_start = pose.pose.position.y
-            self.calc_velocities = CalcVelocities(self.update_freq)
-            change_goal(self)  # sets initial goal/
+        if len(self.data["lat"]) > 0:
+            z_dir = pose.pose.orientation.z
+            w_dir = pose.pose.orientation.w
+            current_ang = tf.transformations.euler_from_quaternion([0, 0, z_dir, w_dir])[2]
+            if (
+                self.reset_angle
+                and self.init_angle is None
+                and self.x_start is None
+                and self.y_start is None
+            ):
+                self.init_angle = current_ang
+                # self.x_start_automower= pose.pose.position.x
+                # self.y_start_automower = pose.pose.position.y
+                self.x_start, self.y_start = convert_lat_lon_to_utm(self.data["lat"][0], self.data["lon"][0])
+                self.calc_velocities = CalcVelocities(self.update_freq)
+                change_goal(self)  # sets initial goal/
 
-        self.x = pose.pose.position.x
-        self.y = pose.pose.position.y
-        lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
-        self.twist.linear.x = lin_vel
-        self.twist.angular.z = ang_vel
-        if self.store_data:
-            self.data["x"].append(self.x)
-            self.data["y"].append(self.y)
-            self.data["angle"].append(current_ang)
-        # if close to goal, cahnge goal
-        if lin_vel == 0.0 and ang_vel == 0.0:
-            change_goal(self)
+            x_automower = pose.pose.position.x
+            y_automower = pose.pose.position.y
+            self.x, self.y = convert_automower_to_utm(self, x_automower, y_automower)
+            lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
+            self.twist.linear.x = lin_vel
+            self.twist.angular.z = ang_vel
+            if self.store_data:
+                self.data["x"].append(self.x)
+                self.data["y"].append(self.y)
+                self.data["angle"].append(current_ang)
+            # if close to goal, cahnge goal
+            if lin_vel == 0.0 and ang_vel == 0.0:
+                change_goal(self)
 
     def ctrlc_shutdown(self, sig, frame):
         self.stop()

@@ -1,5 +1,7 @@
 # from pyproj import Proj, Transformer
 import numpy as np
+import utm
+import math
 def convert_to_xy(lat, lon, lat_start, lon_start):
     x = (lat - lat_start) * 111139
     y = (lon - lon_start) * 111139
@@ -32,14 +34,12 @@ def inverse_change_coord_sys(x_goal, y_goal, x_start, y_start, init_angle): #TOD
     return x_goal_prim, y_goal_prim  # automowers relative coordinates
 
 
+def convert_automower_to_utm(self, x_automower, y_automower):
+    x_utm = self.x_start - x_automower*math.sin(self.angle_north) - y_automower*math.cos(self.angle_north)
+    y_utm = self.y_start + x_automower*math.cos(self.angle_north) - y_automower*math.sin(self.angle_north)
+    return x_utm, y_utm
 
-# def latlon_to_utm(lat, lon, zone_number=None, zone_letter=None):
-#     if zone_number is None or zone_letter is None:
-#         proj_utm = Proj(proj='utm', ellps='WGS84', preserve_units=False)
-#         x, y = proj_utm(lon, lat)
-#         return x, y
-#     else:
-#         proj_utm = Proj(proj='utm', zone=zone_number, zone_letter=zone_letter, ellps='WGS84', preserve_units=False)
-#         x, y = proj_utm(lon, lat)
-#         return x, y
-
+def convert_lat_lon_to_utm(lat, lon):
+    east, north, number, letter = utm.from_latlon(lat, lon)
+    print(north)
+    return east, north

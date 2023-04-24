@@ -1,5 +1,7 @@
 # from coord_sys_trans import change_coord_sys
 import numpy as np 
+
+from coord_sys_trans import *
 def change_goal(self, simulation = False):
     # print(simulation)
     if len(self.order) > 0:
@@ -55,17 +57,18 @@ def _update_data(self, simulation):
 def change_coord_sys(
     self, x_goal_prim, y_goal_prim
 ):  # automowers relative coordinates => global coordinates
-    x_goal = (
+    x_goal_automower = (
         self.x_start
         + x_goal_prim * np.cos(self.init_angle)
         - y_goal_prim * np.sin(self.init_angle)
     )
-    y_goal = (
+    y_goal_automower = (
         self.y_start
         + x_goal_prim * np.sin(self.init_angle)
         + y_goal_prim * np.cos(self.init_angle)
     )
-    return x_goal, y_goal  # automowers global coordinates
+    x_goal, y_goal = convert_automower_to_utm(self, x_goal_automower, y_goal_automower)
+    return x_goal, y_goal  # utm coords 
 
 def _print_progress(self):
     progress = round(len(self.order) / self.tot_num_lines * 100, 1)
