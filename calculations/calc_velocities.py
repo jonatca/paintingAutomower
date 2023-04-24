@@ -34,12 +34,16 @@ class CalcVelocities:
         self.times_above_tol_ang = 0
         self.has_moved = False
         self.dir = 1
+<<<<<<< Updated upstream
         init_state = [0,0,0] 
         init_input = [1,0]
         self.lqr = LQR(init_state, init_input)
 
 
 
+=======
+        self.lqr=LQR([self.x, self.y, self.current_ang], [0.0])  #fixa sen
+>>>>>>> Stashed changes
     def set_circle_params(self, radius, x_mid, y_mid, dir):
         self.radius = radius
         self.x_mid = x_mid
@@ -106,9 +110,12 @@ class CalcVelocities:
         self.current_ang = self._normalize_angle(current_ang)
         self.x = x
         self.y = y
+        self.goal_ang = self._goal_angle_line()
+      
         self.error_lin = np.sqrt(
             (self.x_goal - self.x) ** 2 + (self.y_goal - self.y) ** 2
         )
+<<<<<<< Updated upstream
         if self.paint_circle:
             self.goal_ang = self._goal_angle_line()
             desired_state = [self.x_goal, self.y_goal, self.goal_ang]
@@ -117,7 +124,15 @@ class CalcVelocities:
             # self.calc_radius_velocities()
         else:
             self.calc_line_velocities()
+=======
+        #if self.paint_circle:
+          #  self.calc_radius_velocities()
+        #else:
+           # self.calc_line_velocities()
+        
+>>>>>>> Stashed changes
 
+        self.vel_lin,self.vel_ang = self.lqr.lqr_position(self.x, self.y, self.current_ang, self.x_goal, self.y_goal, self.goal_ang, 0)
         self.vel_lin = np.clip(self.vel_lin, -self.max_vel_lin, self.max_vel_lin)
         self.vel_ang = np.clip(self.vel_ang, -self.max_vel_ang, self.max_vel_ang)
         if self._has_reached_goal():
@@ -168,7 +183,7 @@ class CalcVelocities:
     def _log_message(self):
         print(
             "error_lin: ",
-            round(self.error_lin, 2),
+            round(self.error_lin, 2),-
             "vel_lin: ",
             round(self.vel_lin, 2),
         )
