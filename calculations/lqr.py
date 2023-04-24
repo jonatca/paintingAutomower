@@ -2,8 +2,8 @@ import numpy as np
 import control as ct
 class LQR:
     def __init__(self, initial_state, initial_input):
-        self.state = initial_state   #state tre värden: x y theta
-        self.input= initial_input  # två värden v  omega
+        self.state = initial_state   #state tre varden: x y theta
+        self.input= initial_input  # tva varden v  omega
         self.theta = initial_state[2] 
 
     def get_B(theta, dt):
@@ -28,28 +28,27 @@ class LQR:
         Q = np.array([[1,0,0],
                       [0,1,0],
                       [0,0,1]])
-        R = np.array([[0.1, 0],    #parametrarna kan ändras, börjar med 0.1 på både v o w
+        R = np.array([[0.1, 0],    #parametr
                       [0, 0.1]])
         
         state_error = self.state - desired_state
 
-        #### chatgpt säger detta ####
+        #### chatgpt 
 
         # Compute LQR gain matrix
         K, _, _ = ct.lqr(A, B, Q, R)
 
         u = -np.dot(K, state_error) 
 
-        #### istället för att skriva ut ekvationerna nedan ####   
+ 
 
 
-        N = 50  # man kan testa olika här
+        N = 50  # man kan testa olika
         P = [None]*(N+1)
         Qf = Q
         P[N] = Qf
 
         for i in range(N, 0, -1):
-            #P[i-1] = Q + A^T P[i]A – (A^T P[i]B)(R + BTP[i]B)^-1(B^T P[i]A)  
             P[i-1] = Q + np.dot(A.T, np.dot(P[i], A)) - np.dot(np.dot(np.dot(A.T, np.dot(P[i],B)), np.linalg.inv(R+np.dot(B.T, np.dot(P[i], B)))), (np.dot(B.T, np.dot(P[i], A)))) 
 
         K = [None]* N
@@ -61,4 +60,4 @@ class LQR:
             u[i] = np.dot(K[i], state_error)
         u_star=u[N-1]  ## Optimal control input is u_star
 
-        return u_star  ## bara returna u om lqr från gpt funkar    
+        return u_star  ## bara returna u om lqr f
