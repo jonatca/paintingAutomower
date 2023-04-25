@@ -35,11 +35,17 @@ def inverse_change_coord_sys(x_goal, y_goal, x_start, y_start, init_angle): #TOD
 
 
 def convert_automower_to_utm(self, x_automower, y_automower):
-    x_utm = self.x_start - x_automower*math.sin(self.angle_north) - y_automower*math.cos(self.angle_north)
-    y_utm = self.y_start + x_automower*math.cos(self.angle_north) - y_automower*math.sin(self.angle_north)
+    x_utm = self.x_start +  x_automower*math.cos(self.angle_north) - y_automower*math.sin(self.angle_north)
+    y_utm = self.y_start + y_automower*math.cos(self.angle_north) + x_automower*math.sin(self.angle_north)
     return x_utm, y_utm
 
 def convert_lat_lon_to_utm(lat, lon):
     east, north, number, letter = utm.from_latlon(lat, lon)
-    print(north)
-    return east, north
+    print("east: ", east, "north: ", north)
+    return north, -east
+    # return east, north
+
+def get_angle_north(x_utm1, y_utm1, x_utm2, y_utm2):
+    #x is north and y is west
+    angle_north = math.atan2(x_utm2 - x_utm1, y_utm2 - y_utm1)
+    return angle_north

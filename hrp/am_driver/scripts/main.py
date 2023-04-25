@@ -12,7 +12,7 @@ from sensor_msgs.msg import NavSatFix
 import numpy as np
 from calc_velocities import CalcVelocities
 from paint import get_paint_order
-from plot_data import plot_data
+from plot_data2 import plot_data
 from change_goal import change_goal
 from coord_sys_trans import *
 import datetime
@@ -60,27 +60,30 @@ class Drive_to:
         self.gps_sub = rospy.Subscriber("/GPSfix", NavSatFix, self.gps_callback)
         self.rate = rospy.Rate(self.update_freq) 
         self.order = get_paint_order()
-        self.angle_north = 0
+        self.angle_north = 0 
 
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
             self.lat_start = fix.latitude
             self.lon_start = fix.longitude
+            if self.lat_start <= 10:
+                self.lat_start = 57.68727
+                self.lon_start = 11.97958
             self.data["lat_start"].append(self.lat_start)
             self.data["lon_start"].append(self.lon_start)
             self.data["angle_north_init"].append(0)
+            self.data["lat"].append(self.lat_start)
+            self.data["lon"].append(self.lon_start)
         x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
         self.data["lat"].append(fix.latitude)
         self.data["lon"].append(fix.longitude)
-        self.data["angle_north"].append(0)
-        self.angle_north = 0
+        self.data["angle_north"].append(self.angle_north)
+        #TODO update angle_north
         self.data["covariance"].append(fix.position_covariance)
         #TODO update kalman gps
-        # print(fix.latitude, fix.longitude, "gps")
-        # print(x_gps, y_gps, "gps, converted to xy")
 
     def convert_to_xy(self, lat, lon, lat_start, lon_start):
         x = (lat - lat_start) * 111139
@@ -127,8 +130,9 @@ class Drive_to:
                 and self.y_start is None
             ):
                 self.init_angle = current_ang
-                # self.x_start_automower= pose.pose.position.x
-                # self.y_start_automower = pose.pose.position.y
+                self.x_start_automower= pose.pose.position.x
+                self.y_start_automower = pose.pose.position.y
+                print("init lat" , self.data["lat"][0], "init lon", self.data["lon"][0])
                 self.x_start, self.y_start = convert_lat_lon_to_utm(self.data["lat"][0], self.data["lon"][0])
                 self.calc_velocities = CalcVelocities(self.update_freq)
                 change_goal(self)  # sets initial goal/
@@ -136,6 +140,9 @@ class Drive_to:
             x_automower = pose.pose.position.x
             y_automower = pose.pose.position.y
             self.x, self.y = convert_automower_to_utm(self, x_automower, y_automower)
+            # self.angle_north = get_angle_north(self.x_start, self.y_start, self.x, self.y)
+            print("self.x", self.x, "self.y", self.y)
+            print("angle_north", self.angle_north)
             lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
             self.twist.linear.x = lin_vel
             self.twist.angular.z = ang_vel
