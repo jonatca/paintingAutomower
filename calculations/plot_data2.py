@@ -22,7 +22,7 @@ def plot_data(GPS=True, filename="data.json"):
     y_min = min(y)
     x_max = max(x)
     y_max = max(y)
-    if GPS and False:
+    if GPS and True:
         x_gps = []
         y_gps = []
         for i in range(len(data["lat"])):
@@ -31,7 +31,9 @@ def plot_data(GPS=True, filename="data.json"):
             x_gps_temp, y_gps_temp = convert_lat_lon_to_utm(lat, lon)
             x_gps.append(x_gps_temp)
             y_gps.append(y_gps_temp)
-        plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
+        print("x_gps: ", x_gps)
+        print("y_gps: ", y_gps)
+        plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=20)
         x_min = min(min(x), min(x_gps))
         x_max = max(max(x), max(x_gps))
         y_min = min(min(y), min(y_gps))
