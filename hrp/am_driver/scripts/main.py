@@ -75,20 +75,19 @@ class Drive_to:
             self.data["angle_north_init"].append(0)
             self.data["lat"].append(self.lat_start)
             self.data["lon"].append(self.lon_start)
-        x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
+        lat = fix.latitude
+        lon = fix.longitude
+        # x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
+        x_gps, y_gps = convert_lat_lon_to_utm(lat, lon)
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
-        self.data["lat"].append(fix.latitude)
-        self.data["lon"].append(fix.longitude)
+        self.data["lat"].append(lat)
+        self.data["lon"].append(lon)
         self.data["angle_north"].append(self.angle_north)
         #TODO update angle_north
         self.data["covariance"].append(fix.position_covariance)
         #TODO update kalman gps
 
-    def convert_to_xy(self, lat, lon, lat_start, lon_start):
-        x = (lat - lat_start) * 111139
-        y = (lon - lon_start) * 111139
-        return x, y 
 
     def drive(self):
         signal.signal(
