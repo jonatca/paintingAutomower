@@ -98,6 +98,7 @@ class DriveTo(Node):
         self.msg.speed = 0.0
         self. msg.steering = 0.0
         self.drive_publisher.publish(self.msg)
+        rclpy.shutdown()
         
     def ctrlc_shutdown(self, sig, frame):
         self.stop()
@@ -108,5 +109,3 @@ if __name__ == '__main__':
     rclpy.init()
     drive_to = DriveTo()
     drive_to.move()
-    drive_to.destroy_node()
-    rclpy.shutdown()
