@@ -1,10 +1,14 @@
 # from coord_sys_trans import change_coord_sys
 import numpy as np 
+from imu import *
 
 from coord_sys_trans import *
 def change_goal(self, simulation = False):
     # print(simulation)
     if len(self.order) > 0:
+        # self.angle_north = get_yaw_angle() 
+        print("angle north", self.angle_north)
+        # print("current_angle", self.current_angle)
         self.calc_velocities.not_in_circle()
         if "end" in self.order[0]:
             _handle_end(self)

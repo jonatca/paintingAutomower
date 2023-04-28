@@ -133,6 +133,7 @@ class CalcVelocities:
                 self.times_above_tol_ang += 1
         else:
             self.has_moved = True
+        self._log_message()
         return self.vel_lin, self.vel_ang
 
     def get_sqaure_error_radius(self):
@@ -171,7 +172,7 @@ class CalcVelocities:
     def _log_message(self):
         print(
             "error_lin: ",
-            round(self.error_lin, 2),-
+            round(self.error_lin, 2),
             "vel_lin: ",
             round(self.vel_lin, 2),
         )

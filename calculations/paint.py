@@ -153,15 +153,33 @@ def get_paint_order():
         "type": "circle",
         "direction": "positive",
     }
-    test_line = {
-        "end": (1, 0),
+    len_square = 4
+    test_line1 = {
+        "end": (len_square, 0),
         "type": "line",
     }
+    test_line2 = {
+        "end": (len_square, -len_square) ,
+        "type": "line",
+    }
+    test_line3 = {
+        "end": (0, len_square) ,
+        "type": "line",
+    }
+    test_line4 = {
+        "end": (0, 0) ,
+        "type": "line",
+    }
+
     
 
     paint_order = [
         # test_circle
-        test_line
+        test_line1,
+        test_line2,
+        # test_line3,
+        # test_line4,
+        # test_line2
         # shortside_down,
         # longside_right,
         # shortside_up,

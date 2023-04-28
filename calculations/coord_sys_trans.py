@@ -41,7 +41,6 @@ def convert_automower_to_utm(self, x_automower, y_automower):
 
 def convert_lat_lon_to_utm(lat, lon):
     east, north, number, letter = utm.from_latlon(lat, lon)
-    print("east: ", east, "north: ", north)
     return north, -east
     # return east, north
 
@@ -49,3 +48,43 @@ def get_angle_north(x_utm1, y_utm1, x_utm2, y_utm2):
     #x is north and y is west
     angle_north = math.atan2(x_utm2 - x_utm1, y_utm2 - y_utm1)
     return angle_north
+
+# def get_angle_gps_ordometry(x_gps1, y_gps1, x_gps2, y_gps2, 
+#     #x is north and y is west
+#     angle_gps = math.atan2(x_gps2 - x_gps1, y_gps2 - y_gps1)
+#     return angle_gp
+
+def rotate_point(x, y, x0, y0, phi):
+    x_translated = x - x0
+    y_translated = y - y0
+
+    x_rotated = x_translated * math.cos(phi) - y_translated * math.sin(phi)
+    y_rotated = x_translated * math.sin(phi) + y_translated * math.cos(phi)
+
+    x_new = x_rotated + x0
+    y_new = y_rotated + y0
+
+    return x_new, y_new
+
+
+
+def best_fit_line(x_gps, y_gps):
+    x = np.array(x_gps)
+    y = np.array(y_gps)
+    
+    n = len(x)
+    sum_x = np.sum(x)
+    sum_y = np.sum(y)
+    sum_x_squared = np.sum(x**2)
+    sum_xy = np.sum(x*y)
+    
+    k = (n * sum_xy - sum_x * sum_y) / (n * sum_x_squared - sum_x**2)
+    m = (sum_y - k * sum_x) / n
+    
+    return k, m
+    
+def angle_between_lines(k1, m1, k2, m2):
+    numerator = k2 - k1
+    denominator = 1 + k1 * k2
+    angle = np.arctan2(numerator, denominator)
+    return angle
