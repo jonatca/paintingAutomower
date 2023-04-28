@@ -67,9 +67,10 @@ class DriveTo(Node):
             
         self.x = rtk.east
         self.y = rtk.north
+        print('x,y:', self.x, self.y)
         lin_vel, ang_vel = self.calc_velocities.calc_vel(self.current_ang, self.x, self.y)
-        self.msg.speed = 0.6
-        self.msg.steering = 0.0
+        self.msg.speed = lin_vel
+        self.msg.steering = ang_vel
         if lin_vel == 0.0 and ang_vel == 0.0:
             change_goal(self)
 
@@ -77,6 +78,7 @@ class DriveTo(Node):
         if  self.init_angle is None:
             self.init_angle = imu.yaw
         self.current_ang = imu.yaw
+        print('ang', self.current_ang)
 
     def move(self):
         thread = threading.Thread(target=rclpy.spin, args=(self,))
