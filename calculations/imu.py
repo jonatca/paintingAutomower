@@ -41,10 +41,10 @@ def get_yaw_angle():
             roll = math.degrees(roll)
 
             # Print the yaw angle
-            print("Pitch: {:.2f} Roll:{:.2f}  ".format(pitch, roll))
-            #print("Yaw: {:.2f} ".format(yaw))
+            #print("Pitch: {:.2f} Roll:{:.2f}  ".format(pitch, roll))
+            print("Yaw: {:.2f} ".format(yaw))
             #print("north: {:.2f} ".format(degrees_to_north))
-            #return degrees_to_north*math.pi/180.
+            # return degrees_to_north*math.pi/180.
             
             time.sleep(0.03)
         else:

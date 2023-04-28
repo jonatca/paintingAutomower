@@ -15,6 +15,7 @@ from paint import get_paint_order
 from plot_data2 import plot_data
 from change_goal import change_goal
 from coord_sys_trans import *
+from imu import *
 import datetime
 class Drive_to:
     def __init__(self, reset_angle=True):
@@ -60,8 +61,10 @@ class Drive_to:
         self.gps_sub = rospy.Subscriber("/GPSfix", NavSatFix, self.gps_callback)
         self.rate = rospy.Rate(self.update_freq) 
         self.order = get_paint_order()
-        self.angle_north = 0 
-
+        self.angle_north = 0#np.pi 
+        self.phi = 0
+        self.min_data_points = 10
+        self.max_data_points = 20
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -79,6 +82,19 @@ class Drive_to:
         lon = fix.longitude
         # x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
         x_gps, y_gps = convert_lat_lon_to_utm(lat, lon)
+        if len(self.data["x_gps"]) == self.min_data_points:
+            k1,m1 = best_fit_line(self.data["x_gps"], self.data["y_gps"])
+            k2, m2 = best_fit_line(self.data["x"], self.data["y"])
+            self.phi = angle_between_lines(k1, m1, k2, m2)
+            print("phi", self.phi)
+            self.data["k1"] = k1
+            self.data["k2"] = k2
+            self.data["m1"] = m1
+            self.data["m2"] = m2
+
+
+        x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
+        # x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, np.pi/2)
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
         self.data["lat"].append(lat)
@@ -106,6 +122,7 @@ class Drive_to:
         timestamp = int(timestamp.replace("-", ""))
         #make filename variable with python 2.7
         filename = "../data/{}.json".format(timestamp) #check if this works
+        print("phi", self.phi)
         # filename = f"../data/{timestamp}.json"
         if self.store_data:  
             with open(filename, "w") as json_file:
@@ -121,7 +138,11 @@ class Drive_to:
         if len(self.data["lat"]) > 0:
             z_dir = pose.pose.orientation.z
             w_dir = pose.pose.orientation.w
+            # print(self.angle_north)
             current_ang = tf.transformations.euler_from_quaternion([0, 0, z_dir, w_dir])[2]
+            # self.angle_north = current_ang
+            # if len(self.data["x"]) >= 10:
+            #     self.angle_north = get_angle_north(self.x_start, self.y_start, self.x, self.y)
             if (
                 self.reset_angle
                 and self.init_angle is None
@@ -140,8 +161,7 @@ class Drive_to:
             y_automower = pose.pose.position.y
             self.x, self.y = convert_automower_to_utm(self, x_automower, y_automower)
             # self.angle_north = get_angle_north(self.x_start, self.y_start, self.x, self.y)
-            print("self.x", self.x, "self.y", self.y)
-            print("angle_north", self.angle_north)
+            # print("angle_north", self.angle_north)
             lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
             self.twist.linear.x = lin_vel
             self.twist.angular.z = ang_vel

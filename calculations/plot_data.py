@@ -91,7 +91,7 @@ def plot_data(GPS=True, filename="data.json"):
     )  # Set the backend to Agg (non-interactive) to avoid display errors
     with open(filename, "r") as json_file:
         data = json.load(json_file)
-    print(filename)
+    # print(filename)
     x = data["x"]
     y = data["y"]
     x_start = x[0]
@@ -99,12 +99,12 @@ def plot_data(GPS=True, filename="data.json"):
     x_goal = data["x_goal"]
     y_goal = data["y_goal"]
     angle_start = np.arctan2(np.mean(y[0:70]) - y[0], np.mean(x[0:70]) - x[0])
-    print(angle_start, "angle_start1")
+    # print(angle_start, "angle_start1")
     # for i in range(len(x)):
         # x[i],y[i] = inv_change_coord_sys(x[i], y[i] ,x_start, y_start, angle_start)
     angle_start = np.arctan2(np.mean(y[0:70]) - y[0], np.mean(x[0:70]) - x[0])
     angle_north = -np.pi/2
-    print(angle_start, "angle_start2")
+    # print(angle_start, "angle_start2")
     if GPS:
         # x_gps = data["x_gps"]
         # y_gps = data["y_gps"]
@@ -118,7 +118,7 @@ def plot_data(GPS=True, filename="data.json"):
         x_gps_start, y_gps_start = lat_lon_to_cartesian(lat[0], lon[0])
         delta_x, delta_y = lat_lon_to_cartesian(lat[0], 90 - lon[0])
         y_north_angle = np.arctan2(delta_x, delta_y)
-        print(y_north_angle * 180/np.pi, "y_north_angle")
+        # print(y_north_angle * 180/np.pi, "y_north_angle")
         angle = np.pi/2 - angle_north + y_north_angle 
         x_gps_start, y_gps_start = inverse_change_coord_sys(x_gps_start, y_gps_start, 0, 0, angle)
         for i in range(len(lat)):
@@ -127,9 +127,9 @@ def plot_data(GPS=True, filename="data.json"):
             # x_gps[i], y_gps[i] = lat_lon_to_cartesian(lat[i], lon[i])
 
             x_gps[i], y_gps[i] = lat_lon_to_cartesian(lat[i], lon[i])
-            print(x_gps[i], y_gps[i], "x_gps[i], y_gps[i]")
-            print(x_gps_start, y_gps_start, "x_gps_start, y_gps_start")
-            print(x_gps[i] - x_gps_start, y_gps[i] - y_gps_start, "x_gps[i] - x_gps_start, y_gps[i] - y_gps_start")
+            # print(x_gps[i], y_gps[i], "x_gps[i], y_gps[i]")
+            # print(x_gps_start, y_gps_start, "x_gps_start, y_gps_start")
+            # print(x_gps[i] - x_gps_start, y_gps[i] - y_gps_start, "x_gps[i] - x_gps_start, y_gps[i] - y_gps_start")
             x_gps[i], y_gps[i] = inverse_change_coord_sys(x_gps[i], y_gps[i],x_gps_start, y_gps_start, angle)
 
             # x_gps[i], y_gps[i] -= x_gps_start, y_gps_start # type: ignore

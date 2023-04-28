@@ -8,7 +8,7 @@ from change_goal import change_goal
 
 class Simulate:
     def __init__(self, calc_velocities=None):
-        self.max_time = 3000000
+        self.max_time = 30000
         paint_order = get_paint_order()
         # comb_cut_order = get_comb_cut_order()
         self.order = paint_order # valj om comb_cut eller paint order
