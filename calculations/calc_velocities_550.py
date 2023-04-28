@@ -50,15 +50,15 @@ class CalcVelocities:
     def has_reached_goal(self):
         return self.error_lin < self.tol_lin
 
-    def not_in_circle(self):
-        self.radius = None
-        self.x_mid = None
-        self.y_mid = None
-        self.paint_circle = False
-        self.tol_ang = 7. * np.pi/180
+    # def not_in_circle(self):
+    #     self.radius = None
+    #     self.x_mid = None
+    #     self.y_mid = None
+    #     self.paint_circle = False
+    #     self.tol_ang = 7. * np.pi/180
 
-    def get_sqaure_error_radius(self):
-        return self.square_error_radius
+    # def get_sqaure_error_radius(self):
+    #     return self.square_error_radius
 
 
 # class CalcVelocities:
