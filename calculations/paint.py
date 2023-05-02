@@ -153,13 +153,13 @@ def get_paint_order():
         "type": "circle",
         "direction": "positive",
     }
-    len_square = -0.5
+    len_square = 7
     test_line1 = {
         "end": (len_square, 0),
         "type": "line",
     }
     test_line2 = {
-        "end": (len_square, -len_square) ,
+        "end": (len_square, len_square) ,
         "type": "line",
     }
     test_line3 = {

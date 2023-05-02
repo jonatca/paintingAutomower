@@ -3,10 +3,10 @@ import numpy as np
 
 class CalcVelocities:
     def __init__(self, Kp_circle=-206.5510399, Ki_circle=-18.7532926, Kd_circle=-14.2643917, Kp90_circle=-45.9726824): 
-        self.tol_lin = 0.1  # tolerance in meter
+        self.tol_lin = 0.2  # tolerance in meter
         self.tol_ang = 7. * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180.  # to avoid calculations error
-        self.max_vel_lin = 0.3
+        self.max_vel_lin = 0.4
         self.max_vel_ang = 0.8
         self.Kp_l = 0.9
         self.Kp_a = 1.0
@@ -62,7 +62,7 @@ class CalcVelocities:
         self.x_mid = None
         self.y_mid = None
         self.paint_circle = False
-        self.max_vel_lin = 0.3
+        self.max_vel_lin = 0.4
         self.tol_ang = 7. * np.pi/180
 
 

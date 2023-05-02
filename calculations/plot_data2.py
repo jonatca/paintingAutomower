@@ -18,6 +18,8 @@ def plot_data(GPS=True, filename="data.json"):
         data = json.load(json_file)
     x = data["x"]
     y = data["y"]
+    x_ordometry = data["x_ordometry"]
+    y_ordometry = data["y_ordometry"]
     x_min = min(x)
     y_min = min(y)
     x_max = max(x)
@@ -53,7 +55,13 @@ def plot_data(GPS=True, filename="data.json"):
         # plt.plot(x, y2, label='Line 2: k2={}, m2={}'.format(k2, m2))
 
 
-    plt.plot(x, y, "o-", label="Path Ordometri", markersize=3)
+    x_len = len(x)
+    y_len = len(y)
+    min_len = min(x_len, y_len)
+    x = x[:min_len]
+    y = y[:min_len]
+    plt.plot(x, y, "o-", label="Path Kalman", markersize=8)
+    plt.plot(x_ordometry, y_ordometry, "o-", label="Path Ordometri", markersize=2)
     plt.xlim(x_min, x_max)
     plt.ylim(y_min, y_max)
     print("x_min: ", x_min, " x_max: ", x_max, " y_min: ", y_min, " y_max: ", y_max)

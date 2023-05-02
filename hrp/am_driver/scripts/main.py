@@ -25,6 +25,8 @@ class Drive_to:
         self.data = {
             "x": [],
             "y": [],
+            "x_ordometry": [],
+            "y_ordometry": [],
             "x_goal": [],
             "y_goal": [],
             "x_mid": [],
@@ -53,6 +55,7 @@ class Drive_to:
         self.lat_start = None
         self.lon_start = None
         self.covariance = None
+        self.gps_covariance_factor = 0.005
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -65,11 +68,6 @@ class Drive_to:
         self.angle_north = 0#np.pi 
         self.phi = 0
         self.min_data_points = 10
-        initial_state = np.array([0, 0, 0])
-        initial_input = np.array([0, 0])
-        initial_covariance = np.eye(3) * 0.1
-        process_noise = np.eye(3) * 100 
-        self.ekf = EKF2D(initial_state, initial_input, initial_covariance, process_noise)
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -93,17 +91,22 @@ class Drive_to:
             self.angle = angle_between_lines(k1, m1, k2, m2)
             self.angle_correct = angle_between_points(self.data["x_gps"][0], self.data["y_gps"][0], self.data["x_gps"][-1], self.data["y_gps"][-1])
             self.phi = closest_angle(self.angle, self.angle_correct) 
-
             self.data["k1"] = k1
             self.data["k2"] = k2
             self.data["m1"] = m1
             self.data["m2"] = m2
+            initial_state = np.array([self.x, self.y, 0])
+            initial_input = np.array([0.3, 0])
+            initial_covariance = np.eye(3) * 0.1 
+            process_noise = np.eye(3) * 0.001 
+            self.ekf = EKF2D(initial_state, initial_input, initial_covariance, process_noise)
 
-
-        gps_covariance = fix.position_covariance
+        gps_covariance = fix.position_covariance[0]
         self.data["covariance"].append(gps_covariance)
         if self.phi != 0:
-            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
+            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, self.phi) 
+            gps_covariance = int(gps_covariance) * self.gps_covariance_factor 
+            print("gps_covariance, ", gps_covariance)
             self.ekf.update_gps(x_gps, y_gps, gps_covariance)
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
@@ -164,20 +167,24 @@ class Drive_to:
             y_automower = pose.pose.position.y
             
             self.x, self.y = convert_automower_to_utm(self, x_automower, y_automower)
-            delta_x = self.x - self.ekf.get_state()[0]
-            delta_y = self.y - self.ekf.get_state()[1]
-            # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
-            dt = 1 / self.update_freq
+            self.data["x_ordometry"].append(self.x)
+            self.data["y_ordometry"].append(self.y)
+            self.data["angle"].append(current_ang)
             if self.phi != 0:
+                # delta_x = self.x - self.ekf.get_state()[0]
+                # delta_y = self.y - self.ekf.get_state()[1]
+                delta_x = self.data["x_ordometry"][-1] - self.data["x_ordometry"][-2]
+                delta_y = self.data["y_ordometry"][-1] - self.data["y_ordometry"][-2]
+                # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
+                dt = 1 / self.update_freq
                 self.ekf.predict(delta_x, delta_y, dt)
                 self.x,self.y, not_used_angle = self.ekf.get_state()
+                # current_ang = np.arctan2(delta_x, delta_y)
+            self.data["x"].append(self.x)
+            self.data["y"].append(self.y)
             lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
             self.twist.linear.x = lin_vel
             self.twist.angular.z = ang_vel
-            if self.store_data:
-                self.data["x"].append(self.x)
-                self.data["y"].append(self.y)
-                self.data["angle"].append(current_ang)
             # if close to goal, cahnge goal
             if lin_vel == 0.0 and ang_vel == 0.0:
                 change_goal(self)
