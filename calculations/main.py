@@ -14,7 +14,7 @@ from hqv_public_interface.msg import MowerImu
 from hqv_public_interface.msg import MowerGnssRtkRelativePositionENU
 
 import numpy as np
-from calc_velocities import CalcVelocities
+from calc_velocities_550 import CalcVelocities
 from paint import get_paint_order
 from plot_data2 import plot_data
 from change_goal import change_goal
@@ -39,8 +39,11 @@ class DriveTo(Node):
             "y": [],
             "x_goal": [],
             "y_goal": [],
+            "x_start": [],
+            "y_start": [],
             "angle_north": [],
             "angle_north_init": [],
+            "angle": [],
         }
         self.x = None 
         self.y = None
@@ -62,8 +65,10 @@ class DriveTo(Node):
                 self.y_start = rtk.north
                 self.x_start_automower = rtk.east
                 self.y_start_automower = rtk.north
-                self.calc_velocities = CalcVelocities(self.update_freq)
+                self.calc_velocities = CalcVelocities()
                 change_goal(self)
+                self.data["x_start"].append(self.x_start)
+                self.data["y_start"].append(self.y_start)
             
         self.x = rtk.east
         self.y = rtk.north
@@ -71,6 +76,8 @@ class DriveTo(Node):
         lin_vel, ang_vel = self.calc_velocities.calc_vel(self.current_ang, self.x, self.y)
         self.msg.speed = lin_vel
         self.msg.steering = ang_vel
+        self.data["y"].append(self.y)
+        self.data["x"].append(self.x)
         if lin_vel == 0.0 and ang_vel == 0.0:
             change_goal(self)
 
@@ -78,7 +85,8 @@ class DriveTo(Node):
         if  self.init_angle is None:
             self.init_angle = imu.yaw
         self.current_ang = imu.yaw
-        print('ang', self.current_ang)
+
+        #print('ang', self.current_ang)
 
     def move(self):
         thread = threading.Thread(target=rclpy.spin, args=(self,))
@@ -98,6 +106,7 @@ class DriveTo(Node):
         self.msg.speed = 0.0
         self. msg.steering = 0.0
         self.drive_publisher.publish(self.msg)
+        print('x:',self.data["x"], 'y:',self.data["y"])
         rclpy.shutdown()
         
     def ctrlc_shutdown(self, sig, frame):
