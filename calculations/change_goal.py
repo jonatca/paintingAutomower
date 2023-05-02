@@ -7,7 +7,7 @@ def change_goal(self, simulation = False):
     # print(simulation)
     if len(self.order) > 0:
         # self.angle_north = get_yaw_angle() 
-        print("angle north", self.angle_north)
+        # print("angle north", self.angle_north)
         # print("current_angle", self.current_angle)
         self.calc_velocities.not_in_circle()
         if "end" in self.order[0]:
@@ -71,10 +71,10 @@ def change_coord_sys(
         + x_goal_prim * np.sin(self.init_angle)
         + y_goal_prim * np.cos(self.init_angle)
     )
-    print("x_goal_automower: ", x_goal_automower, "y_goal_automower: ", y_goal_automower)
-    print("self.x_start", self.x_start, "self.y_start", self.y_start)
+    # print("x_goal_automower: ", x_goal_automower, "y_goal_automower: ", y_goal_automower)
+    # print("self.x_start", self.x_start, "self.y_start", self.y_start)
     x_goal, y_goal = convert_automower_to_utm(self, x_goal_automower, y_goal_automower)
-    print("changed goal to: ", x_goal, y_goal)
+    # print("changed goal to: ", x_goal, y_goal)
     return x_goal, y_goal  # utm coords 
 
 def _print_progress(self):

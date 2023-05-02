@@ -16,6 +16,7 @@ from plot_data2 import plot_data
 from change_goal import change_goal
 from coord_sys_trans import *
 from imu import *
+from kalman import EKF2D
 import datetime
 class Drive_to:
     def __init__(self, reset_angle=True):
@@ -64,7 +65,11 @@ class Drive_to:
         self.angle_north = 0#np.pi 
         self.phi = 0
         self.min_data_points = 10
-        self.max_data_points = 20
+        initial_state = np.array([0, 0, 0])
+        initial_input = np.array([0, 0])
+        initial_covariance = np.eye(3) * 0.1
+        process_noise = np.eye(3) * 100 
+        self.ekf = EKF2D(initial_state, initial_input, initial_covariance, process_noise)
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -85,24 +90,26 @@ class Drive_to:
         if len(self.data["x_gps"]) == self.min_data_points:
             k1,m1 = best_fit_line(self.data["x_gps"], self.data["y_gps"])
             k2, m2 = best_fit_line(self.data["x"], self.data["y"])
-            self.phi = angle_between_lines(k1, m1, k2, m2)
-            print("phi", self.phi)
+            self.angle = angle_between_lines(k1, m1, k2, m2)
+            self.angle_correct = angle_between_points(self.data["x_gps"][0], self.data["y_gps"][0], self.data["x_gps"][-1], self.data["y_gps"][-1])
+            self.phi = closest_angle(self.angle, self.angle_correct) 
+
             self.data["k1"] = k1
             self.data["k2"] = k2
             self.data["m1"] = m1
             self.data["m2"] = m2
 
 
-        x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
-        # x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, np.pi/2)
+        gps_covariance = fix.position_covariance
+        self.data["covariance"].append(gps_covariance)
+        if self.phi != 0:
+            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
+            self.ekf.update_gps(x_gps, y_gps, gps_covariance)
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
         self.data["lat"].append(lat)
         self.data["lon"].append(lon)
         self.data["angle_north"].append(self.angle_north)
-        #TODO update angle_north
-        self.data["covariance"].append(fix.position_covariance)
-        #TODO update kalman gps
 
 
     def drive(self):
@@ -138,11 +145,7 @@ class Drive_to:
         if len(self.data["lat"]) > 0:
             z_dir = pose.pose.orientation.z
             w_dir = pose.pose.orientation.w
-            # print(self.angle_north)
             current_ang = tf.transformations.euler_from_quaternion([0, 0, z_dir, w_dir])[2]
-            # self.angle_north = current_ang
-            # if len(self.data["x"]) >= 10:
-            #     self.angle_north = get_angle_north(self.x_start, self.y_start, self.x, self.y)
             if (
                 self.reset_angle
                 and self.init_angle is None
@@ -159,9 +162,15 @@ class Drive_to:
 
             x_automower = pose.pose.position.x
             y_automower = pose.pose.position.y
+            
             self.x, self.y = convert_automower_to_utm(self, x_automower, y_automower)
-            # self.angle_north = get_angle_north(self.x_start, self.y_start, self.x, self.y)
-            # print("angle_north", self.angle_north)
+            delta_x = self.x - self.ekf.get_state()[0]
+            delta_y = self.y - self.ekf.get_state()[1]
+            # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
+            dt = 1 / self.update_freq
+            if self.phi != 0:
+                self.ekf.predict(delta_x, delta_y, dt)
+                self.x,self.y, not_used_angle = self.ekf.get_state()
             lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
             self.twist.linear.x = lin_vel
             self.twist.angular.z = ang_vel
