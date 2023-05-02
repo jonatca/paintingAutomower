@@ -88,3 +88,16 @@ def angle_between_lines(k1, m1, k2, m2):
     denominator = 1 + k1 * k2
     angle = np.arctan2(numerator, denominator)
     return angle
+
+def angle_between_points(xg1, yg1, xg2, yg2):
+    cosphi = (xg2-xg1)/np.sqrt((xg2-xg1)**2 + (yg2-yg1)**2)
+    return np.arccos(cosphi)
+
+def closest_angle(angle, correct_ang):
+    angle1 = angle
+    angle2 = np.pi - angle
+    angle3 = -angle
+    angle4 = -np.pi - angle
+    angles = [angle1, angle2, angle3, angle4]
+    closest = min(angles, key=lambda x: abs(x - correct_ang))
+    return closest

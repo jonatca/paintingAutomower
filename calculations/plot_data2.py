@@ -38,19 +38,19 @@ def plot_data(GPS=True, filename="data.json"):
         x_max = max(max(x), max(x_gps))
         y_min = min(min(y), min(y_gps))
         y_max = max(max(y), max(y_gps))
-        k1 = data["k1"]
-        k2 = data["k2"]
-        m1 = data["m1"]
-        m2 = data["m2"]
-        x = np.linspace(0, 100, 100)
+        # k1 = data["k1"]
+        # k2 = data["k2"]
+        # m1 = data["m1"]
+        # m2 = data["m2"]
+        # x = np.linspace(0, 100, 100)
 
-        # Compute the y values for the two lines using the given slopes and intercepts
-        y1 = k1 * x + m1
-        y2 = k2 * x + m2
+        # # Compute the y values for the two lines using the given slopes and intercepts
+        # y1 = k1 * x + m1
+        # y2 = k2 * x + m2
 
-        # Plot the lines
-        plt.plot(x, y1, label='Line 1: k1={}, m1={}'.format(k1, m1))
-        plt.plot(x, y2, label='Line 2: k2={}, m2={}'.format(k2, m2))
+        # # Plot the lines
+        # plt.plot(x, y1, label='Line 1: k1={}, m1={}'.format(k1, m1))
+        # plt.plot(x, y2, label='Line 2: k2={}, m2={}'.format(k2, m2))
 
 
     plt.plot(x, y, "o-", label="Path Ordometri", markersize=3)
