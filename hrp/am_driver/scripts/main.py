@@ -25,6 +25,8 @@ class Drive_to:
         self.data = {
             "x": [],
             "y": [],
+            "x_ordometry": [],
+            "y_ordometry": [],
             "x_goal": [],
             "y_goal": [],
             "x_mid": [],
@@ -39,7 +41,9 @@ class Drive_to:
             "angle_north": [],
             "angle_north_init": [],
             "covariance": [],
+            "angle_ordometry": [],
             "angle": [],
+            "GPS_angle": [],
         }
         self.x = None 
         self.y = None
@@ -53,6 +57,7 @@ class Drive_to:
         self.lat_start = None
         self.lon_start = None
         self.covariance = None
+        self.gps_covariance_factor = 0.03 #0.07
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -65,11 +70,6 @@ class Drive_to:
         self.angle_north = 0#np.pi 
         self.phi = 0
         self.min_data_points = 10
-        initial_state = np.array([0, 0, 0])
-        initial_input = np.array([0, 0])
-        initial_covariance = np.eye(3) * 0.1
-        process_noise = np.eye(3) * 100 
-        self.ekf = EKF2D(initial_state, initial_input, initial_covariance, process_noise)
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -92,24 +92,40 @@ class Drive_to:
             k2, m2 = best_fit_line(self.data["x"], self.data["y"])
             self.angle = angle_between_lines(k1, m1, k2, m2)
             self.angle_correct = angle_between_points(self.data["x_gps"][0], self.data["y_gps"][0], self.data["x_gps"][-1], self.data["y_gps"][-1])
-            self.phi = closest_angle(self.angle, self.angle_correct) 
-
+            # self.phi = closest_angle(self.angle, self.angle_correct) 
+            self.phi = self.angle_correct
             self.data["k1"] = k1
             self.data["k2"] = k2
             self.data["m1"] = m1
             self.data["m2"] = m2
+            initial_state = np.array([self.x, self.y, 0])
+            initial_input = np.array([0.4, 0])
+            initial_covariance = np.eye(3) * 0.1 
+            process_noise = np.eye(3) * 0.001 
+            self.ekf = EKF2D(initial_state, initial_input, initial_covariance, process_noise)
+        elif len(self.data["x_gps"]) < self.min_data_points:
+            self.calc_velocities.max_vel_lin = 0.2
+        else:
+            self.calc_velocities.max_vel_lin = 0.4
 
-
-        gps_covariance = fix.position_covariance
+        gps_covariance = fix.position_covariance[0]
         self.data["covariance"].append(gps_covariance)
+        gps_angle = None
         if self.phi != 0:
-            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
-            self.ekf.update_gps(x_gps, y_gps, gps_covariance)
+            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, self.phi) 
+            if len(self.data["x_gps"]) > self.min_data_points:
+                gps_angle = np.arctan2(y_gps - self.data["y_gps"][-1], x_gps - self.data["x_gps"][-1])
+            else:
+                gps_angle = 0
+            gps_covariance = int(gps_covariance) * self.gps_covariance_factor 
+            self.ekf.update_gps(x_gps, y_gps,gps_angle, gps_covariance)
+        self.data["GPS_angle"] = gps_angle
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
         self.data["lat"].append(lat)
         self.data["lon"].append(lon)
         self.data["angle_north"].append(self.angle_north)
+        self.calc_velocities.log_message()
 
 
     def drive(self):
@@ -164,20 +180,35 @@ class Drive_to:
             y_automower = pose.pose.position.y
             
             self.x, self.y = convert_automower_to_utm(self, x_automower, y_automower)
-            delta_x = self.x - self.ekf.get_state()[0]
-            delta_y = self.y - self.ekf.get_state()[1]
-            # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
-            dt = 1 / self.update_freq
+            self.data["x_ordometry"].append(self.x)
+            self.data["y_ordometry"].append(self.y)
+            self.data["angle_ordometry"].append(current_ang)
             if self.phi != 0:
-                self.ekf.predict(delta_x, delta_y, dt)
-                self.x,self.y, not_used_angle = self.ekf.get_state()
+                # delta_x = self.x - self.ekf.get_state()[0]
+                # delta_y = self.y - self.ekf.get_state()[1]
+                delta_x = self.data["x_ordometry"][-1] - self.data["x_ordometry"][-2]
+                delta_y = self.data["y_ordometry"][-1] - self.data["y_ordometry"][-2]
+                # delta_ang = self.data["angle"][-1] - self.data["angle"][-2]
+                delta_ang = np.arctan2(delta_y, delta_x)
+                # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
+                dt = 1 / self.update_freq
+                self.ekf.predict(delta_x, delta_y,delta_ang, dt)
+                self.x,self.y, current_ang2 = self.ekf.get_state()
+                #normailize angle
+                while current_ang2 > np.pi:
+                    current_ang2 -= 2 * np.pi
+                while current_ang2 < -np.pi:
+                    current_ang2 += 2 * np.pi
+                self.data["angle"].append(current_ang2)
+            self.data["x"].append(self.x)
+            self.data["y"].append(self.y)
             lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
             self.twist.linear.x = lin_vel
             self.twist.angular.z = ang_vel
-            if self.store_data:
-                self.data["x"].append(self.x)
-                self.data["y"].append(self.y)
-                self.data["angle"].append(current_ang)
+            try:
+                print("angle kalman", current_ang, "ordometry_angle", self.data["angle_ordometry"][-1], "gps_angle", self.data["GPS_angle"][-1]) 
+            except:
+                pass
             # if close to goal, cahnge goal
             if lin_vel == 0.0 and ang_vel == 0.0:
                 change_goal(self)
