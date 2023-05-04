@@ -10,6 +10,7 @@ class CalcVelocities:
         self.turn_vel_lin = 0.3
         self.max_vel_ang = 2.0
         self.square_error_radius = 0
+        update_freq = 10.
 
     def calc_vel(self, current_ang, x, y):
         self.current_ang = current_ang
@@ -18,6 +19,7 @@ class CalcVelocities:
         self.error_lin = np.sqrt((self.x_goal - self.x) ** 2 + (self.y_goal - self.y) ** 2)
         print('self error lin:', self.error_lin)
         self.ang_error = self.norm_goal_angle_error()
+        print('self error ang:', self.ang_error)
         
         if self.has_reached_goal():
             print('hej:)')
@@ -38,7 +40,7 @@ class CalcVelocities:
         return self.lin_vel, self.ang_vel
 
     def norm_goal_angle_error(self):
-        self.error_ang = np.arctan2(self.y_goal - self.y, self.x_goal - self.x) - self.current_ang# - np.pi/2
+        self.error_ang = np.arctan2(self.y_goal - self.y, self.x_goal - self.x) - self.current_ang #- np.pi/2
         self.error_ang = np.arctan2(np.sin(self.error_ang), np.cos(self.error_ang))
         return self.error_ang
 
@@ -50,15 +52,15 @@ class CalcVelocities:
     def has_reached_goal(self):
         return self.error_lin < self.tol_lin
 
-    # def not_in_circle(self):
-    #     self.radius = None
-    #     self.x_mid = None
-    #     self.y_mid = None
-    #     self.paint_circle = False
-    #     self.tol_ang = 7. * np.pi/180
+    def not_in_circle(self):
+        self.radius = None
+        self.x_mid = None
+        self.y_mid = None
+        self.paint_circle = False
+        self.tol_ang = 7. * np.pi/180
 
-    # def get_sqaure_error_radius(self):
-    #     return self.square_error_radius
+    def get_sqaure_error_radius(self):
+        return self.square_error_radius
 
 
 # class CalcVelocities:
