@@ -1,6 +1,6 @@
 # from coord_sys_trans import change_coord_sys
 import numpy as np 
-from imu import *
+#from imu import *
 
 
 from coord_sys_trans import *
@@ -47,10 +47,10 @@ def _handle_no_end(self, simulation):
     change_goal(self, simulation)
 
 def _update_data(self, simulation):
-    #if not simulation:
-        #self.x_goal, self.y_goal = change_coord_sys(self, self.x_goal, self.y_goal)
+    if not simulation:
+        self.x_goal, self.y_goal = change_coord_sys(self, self.x_goal, self.y_goal)
         # if self.drive_in_circle:
-            # self.x_mid, self.y_mid = change_coord_sys(self, self.x_mid, self.y_mid)
+        #     self.x_mid, self.y_mid = change_coord_sys(self, self.x_mid, self.y_mid)
     self.data["x_goal"].append(self.x_goal)
     self.data["y_goal"].append(self.y_goal)
     if self.drive_in_circle:
@@ -59,24 +59,24 @@ def _update_data(self, simulation):
         self.data["y_mid"].append(self.y_mid)
     self.calc_velocities.set_goal_coords(self.x_goal, self.y_goal)
 
-# def change_coord_sys(
-#     self, x_goal_prim, y_goal_prim
-# ):  # automowers relative coordinates => global coordinates
-#     x_goal_automower = (
-#         self.x_start_automower
-#         + x_goal_prim * np.cos(self.init_angle)
-#         - y_goal_prim * np.sin(self.init_angle)
-#     )
-#     y_goal_automower = (
-#         self.y_start_automower
-#         + x_goal_prim * np.sin(self.init_angle)
-#         + y_goal_prim * np.cos(self.init_angle)
-#     )
-#     print("x_goal_automower: ", x_goal_automower, "y_goal_automower: ", y_goal_automower)
-#     print("self.x_start", self.x_start, "self.y_start", self.y_start)
-#     x_goal, y_goal = convert_automower_to_utm(self, x_goal_automower, y_goal_automower)
-#     print("changed goal to: ", x_goal, y_goal)
-#     return x_goal, y_goal  # utm coords 
+def change_coord_sys(
+    self, x_goal_prim, y_goal_prim
+):  # automowers relative coordinates => global coordinates
+    x_goal_automower = (
+        self.x_start_automower
+        - x_goal_prim * np.cos(self.init_angle)
+        - y_goal_prim * np.sin(self.init_angle)
+    )
+    y_goal_automower = (
+        self.y_start_automower
+        - x_goal_prim * np.sin(self.init_angle)
+        + y_goal_prim * np.cos(self.init_angle)
+    )
+    print("x_goal_automower: ", x_goal_automower, "y_goal_automower: ", y_goal_automower)
+    print("self.x_start", self.x_start, "self.y_start", self.y_start)
+    x_goal, y_goal = x_goal_automower, y_goal_automower  #convert_automower_to_utm(self, x_goal_automower, y_goal_automower)
+    print("changed goal to: ", x_goal, y_goal)
+    return x_goal, y_goal  # utm coords 
 
 def _print_progress(self):
     progress = round(len(self.order) / self.tot_num_lines * 100, 1)

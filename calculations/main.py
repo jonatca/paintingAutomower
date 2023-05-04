@@ -4,7 +4,7 @@ import threading
 import sys
 import tty
 import termios
-
+import matplotlib.pyplot as plt
 import signal
 import json
 
@@ -47,6 +47,7 @@ class DriveTo(Node):
         }
         self.x = None 
         self.y = None
+        self.current_ang = None
         self.x_start = None
         self.y_start = None
         self.init_angle = None
@@ -108,6 +109,16 @@ class DriveTo(Node):
         self.drive_publisher.publish(self.msg)
         print('x:',self.data["x"], 'y:',self.data["y"])
         rclpy.shutdown()
+        plt.plot(self.x, self.y, "o-", label="Path", markersize=3)
+        plt.plot(self.calc_velocities.x_goal, self.calc_velocities.y_goal, "rx", markersize=3, label="Goal")
+        # print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
+        plt.xlabel("x ")
+        plt.ylabel("y ")
+        plt.title("Path and Goal")
+        plt.legend()
+        plt.axis("equal")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        timestamp = int(timestamp.replace("-", ""))
         
     def ctrlc_shutdown(self, sig, frame):
         self.stop()

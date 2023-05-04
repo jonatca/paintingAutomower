@@ -4,45 +4,70 @@ import numpy as np
 class CalcVelocities:
     def __init__(self):
         self.tol_lin = 0.1
-        self.tol_ang = 7. * np.pi / 180
+        self.tol_ang = .5 * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180
         self.max_vel_lin = 0.6
-        self.turn_vel_lin = 0.3
-        self.max_vel_ang = 2.0
+        self.turn_vel_lin = 0.2
+        self.max_vel_ang = 3.0
         self.square_error_radius = 0
         update_freq = 10.
+        self.Kp_l = 0.9
+        self.Kp_a = 1.0
+
+    def calc_line_velocities(self):
+        self.goal_ang = self.goal_angle()
+        self.error_ang = self.goal_ang - self.current_ang - np.pi
+        self.error_ang = np.arctan2(np.sin(self.error_ang), np.cos(self.error_ang))
+        #self.error_ang = (self.error_ang + np.pi) % (2 * np.pi) - np.pi
+        print('error ang:', self.error_ang)
+        if np.abs(self.error_ang) < self.min_tol_ang:  # to avoid calculatins error
+            self.error_ang = 0.0
+        if abs(self.error_ang) > self.tol_ang:
+            self.vel_ang = self.Kp_a * self.error_ang
+            self.vel_lin = self.turn_vel_lin
+        else:
+            self.vel_ang = 0.0
+            self.vel_lin = self.Kp_l * self.error_lin  # slow down when close to goal
 
     def calc_vel(self, current_ang, x, y):
-        self.current_ang = current_ang
+        self.current_ang = self._normalize_angle(current_ang)
         self.x = x
         self.y = y
         self.error_lin = np.sqrt((self.x_goal - self.x) ** 2 + (self.y_goal - self.y) ** 2)
         print('self error lin:', self.error_lin)
-        self.ang_error = self.norm_goal_angle_error()
-        print('self error ang:', self.ang_error)
-        
-        if self.has_reached_goal():
-            print('hej:)')
-            self.lin_vel = 0.0
-            self.ang_vel = 0.0
-            return self.lin_vel, self.ang_vel
+        # if self.has_reached_goal():
+        #     print('hej:)')
+        #     self.lin_vel = 0.0
+        #     self.ang_vel = 0.0
+        #     return self.lin_vel, self.ang_vel
         # self.lin_vel = min(self.max_lin_vel, self.error_lin)
-
+        self.calc_line_velocities()
+        self.vel_lin = np.clip(self.vel_lin, -self.max_vel_lin, self.max_vel_lin)
+        self.vel_ang = np.clip(self.vel_ang, -self.max_vel_ang, self.max_vel_ang)
+        if self.has_reached_goal():
+            self.vel_lin = 0.0
+            self.vel_ang = 0.0
         if np.abs(self.error_ang) < self.min_tol_ang:  # to avoid calculatins error
-            self.error_ang = 0
-        if abs(self.ang_error) > self.tol_ang:
-            self.ang_vel = self.error_ang
-            self.lin_vel = self.turn_vel_lin
-        else: # go straight
-            self.ang_vel = 0.0
-            self.lin_vel = min(self.max_vel_lin, self.error_lin)
+            self.error_ang = 0.0
+        # if abs(self.ang_error) > self.tol_ang:
+        #     self.ang_vel = self.error_ang
+        #     self.lin_vel = self.turn_vel_lin
+        # else: # go straight
+        #     self.ang_vel = 0.0
+        #     self.lin_vel = min(self.max_vel_lin, self.error_lin)
             
-        return self.lin_vel, self.ang_vel
-
-    def norm_goal_angle_error(self):
-        self.error_ang = np.arctan2(self.y_goal - self.y, self.x_goal - self.x) - self.current_ang #- np.pi/2
-        self.error_ang = np.arctan2(np.sin(self.error_ang), np.cos(self.error_ang))
-        return self.error_ang
+        return self.vel_lin, self.vel_ang
+    
+    def _normalize_angle(self, angle):
+        while angle > np.pi:
+            angle -= 2 * np.pi
+        while angle < -np.pi:
+            angle += 2 * np.pi
+        return angle
+    def goal_angle(self):
+            return np.arctan2(self.y_goal - self.y, self.x_goal - self.x)
+        #self.error_ang = np.arctan2(np.sin(self.error_ang), np.cos(self.error_ang))
+        #return self.error_ang
 
     def set_goal_coords(self, x_goal, y_goal):
         self.x_goal = x_goal
