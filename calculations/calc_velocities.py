@@ -3,10 +3,10 @@ import numpy as np
 
 class CalcVelocities:
     def __init__(self, Kp_circle=-206.5510399, Ki_circle=-18.7532926, Kd_circle=-14.2643917, Kp90_circle=-45.9726824): 
-        self.tol_lin = 0.2  # tolerance in meter
-        self.tol_ang = 7. * np.pi / 180
+        self.tol_lin = 0.1  # tolerance in meter
+        self.tol_ang = 4. * np.pi / 180
         self.min_tol_ang = 0.1 * np.pi / 180.  # to avoid calculations error
-        self.max_vel_lin = 0.4
+        self.max_vel_lin = 0.2
         self.max_vel_ang = 0.8
         self.Kp_l = 0.9
         self.Kp_a = 1.0
@@ -52,18 +52,18 @@ class CalcVelocities:
             self.Kd_circle = np.abs(self.Kd_circle)
             self.Kp90_circle = -np.abs(self.Kp90_circle)
         self.paint_circle = True
-        self.max_vel_lin = 0.2
+        self.max_vel_lin = 0.2  
         if self.radius > 5.: #by test, kp circle is too high for big circles
             self.Kp_circle = self.Kp_circle/2
-        self.tol_ang = 7. * np.pi/180
+        self.tol_ang = 4. * np.pi/180
 
     def not_in_circle(self):
         self.radius = None
         self.x_mid = None
         self.y_mid = None
         self.paint_circle = False
-        self.max_vel_lin = 0.4
-        self.tol_ang = 7. * np.pi/180
+        self.max_vel_lin = 0.2
+        self.tol_ang = 4. * np.pi/180
 
 
     def calc_radius_velocities(self):
@@ -133,7 +133,6 @@ class CalcVelocities:
                 self.times_above_tol_ang += 1
         else:
             self.has_moved = True
-        self._log_message()
         return self.vel_lin, self.vel_ang
 
     def get_sqaure_error_radius(self):
@@ -169,37 +168,38 @@ class CalcVelocities:
     def _has_reached_goal(self):
         return self.error_lin < self.tol_lin
 
-    def _log_message(self):
+    def log_message(self):
         print(
             "error_lin: ",
             round(self.error_lin, 2),
             "vel_lin: ",
             round(self.vel_lin, 2),
         )
-        print(
-            "current_ang",
-            round(self.current_ang, 2),
-            "goal_ang",
-            round(self.goal_ang, 2),
-            "error_ang: ",
-            round(self.error_ang, 2),
-            "vel_ang: ",
-            round(self.vel_ang, 2),
-        )
-        print(
-            "x",
-            round(self.x, 2),
-            "y",
-            round(self.y, 2),
-            "x_goal",
-            round(self.x_goal, 2),
-            "y_goal",
-            round(self.y_goal, 2),
-            "lin_vel",
-            round(self.vel_lin, 2),
-            "ang_vel",
-            round(self.vel_ang, 2),
-        )
+        # print(
+        #     "current_ang",
+        #     round(self.current_ang, 2),
+        #     "goal_ang",
+        #     round(self.goal_ang, 2),
+        #     "error_ang: ",
+        #     round(self.error_ang, 2),
+        #     "vel_ang: ",
+        #     round(self.vel_ang, 2),
+        # )
+        # print(
+        #     "x",
+        #     round(self.x, 2),
+        #     "y",
+        #     round(self.y, 2),
+        #     "x_goal",
+        #     round(self.x_goal, 2),
+        #     "y_goal",
+        #     round(self.y_goal, 2),
+        #     "lin_vel",
+        #     round(self.vel_lin, 2),
+        #     "ang_vel",
+        #     round(self.vel_ang, 2),
+        # )
+        pass
 
     def set_goal_coords(self, x_goal, y_goal):
         self.x_goal = x_goal

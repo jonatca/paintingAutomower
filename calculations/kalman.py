@@ -19,7 +19,7 @@ class EKF2D:
                       [np.sin(theta)*dt, 0],
                        [0, dt]])
          return B
-    def predict(self, delta_x, delta_y, dt):     #delta om vi ska anvanda oss av position istallet for input v o w
+    def predict(self, delta_x, delta_y,delta_ang, dt):     #delta om vi ska anvanda oss av position istallet for input v o w
                                                 #F = np.array([
                                                 #    [1, 0, dt, 0],
                                                 #    [0, 1, 0, dt],
@@ -36,7 +36,7 @@ class EKF2D:
                                                 # [np.sin(theta)*dt, 0
                                                     #[0, dt]]])
         
-        u = np.array([delta_x, delta_y, 0]) # u = np.array([delta_x, delta_y, np.atan2(delta_y/delta_x)])
+        u = np.array([delta_x, delta_y, delta_ang]) # u = np.array([delta_x, delta_y, np.atan2(delta_y/delta_x)])
         self.state = np.dot(A, self.state) + u
         noise= np.array([[0],[0],[0]]) # ngt ryp av noise far laggas till
 
@@ -48,11 +48,11 @@ class EKF2D:
     def get_state(self):
         return self.state
     
-    def update_gps(self, gps_x, gps_y, measurement_noise): #fixa funktion sen?
+    def update_gps(self, gps_x, gps_y,yaw, measurement_noise): #fixa funktion sen?
       self.measurement_noise = np.eye(3) * measurement_noise
-      return self.update(gps_x, gps_y, self.measurement_noise)
+      return self.update(gps_x, gps_y,yaw, self.measurement_noise)
     
-    def update(self, gps_x, gps_y, position_covariance):
+    def update(self, gps_x, gps_y, yaw, position_covariance):
         #self.R_k= position_covariance   #covariance matris for matbara
         self.R_k = position_covariance
         # self.R_k = np.array([[182,0,0],
@@ -63,13 +63,13 @@ class EKF2D:
             [0, 1, 0 ],
             [0, 0, 1]
         ])
-        yaw =0  ## lagga in data for nya sensorn med vinkel
         y_k = np.array([gps_x, gps_y, yaw]) - np.dot(H_k, self.state)   # Calculate the difference between the actual sensor measurements
                                                                         # at time k minus what the measurement model prmeaedicted 
                                                                         # the sensor measurements would be for the current timestep k.
 
         S_k = np.dot(H_k, np.dot(self.P_k, H_k.T)) + self.R_k           # R_k=position_covariance
         K_k = np.dot(self.P_k, np.dot(H_k.T, np.linalg.inv(S_k)))       #np.linalg.pinv??
+        print("K_k", K_k)
 
         self.state = self.state + np.dot(K_k, y_k)
         self.P_k = self.P_k - np.dot(K_k, np.dot(H_k, self.P_k))        #uppdatera state covariance for tid k    # np.dot(np.eye(4) - np.dot(K_k, H_k), self.covariance)
