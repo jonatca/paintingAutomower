@@ -17,7 +17,7 @@ import numpy as np
 from calc_velocities_550 import CalcVelocities
 from paint import get_paint_order
 from plot_data2 import plot_data
-from change_goal import change_goal
+from change_goal_550 import change_goal
 from coord_sys_trans import *
 import datetime
 
