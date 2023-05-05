@@ -57,7 +57,7 @@ class Drive_to:
         self.lat_start = None
         self.lon_start = None
         self.covariance = None
-        self.gps_covariance_factor = 0.03 #0.07
+        self.gps_covariance_factor = 0.05 #0.07
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -69,7 +69,7 @@ class Drive_to:
         self.order = get_paint_order()
         self.angle_north = 0#np.pi 
         self.phi = 0
-        self.min_data_points = 10
+        self.min_data_points = 15
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -92,8 +92,8 @@ class Drive_to:
             k2, m2 = best_fit_line(self.data["x"], self.data["y"])
             self.angle = angle_between_lines(k1, m1, k2, m2)
             self.angle_correct = angle_between_points(self.data["x_gps"][0], self.data["y_gps"][0], self.data["x_gps"][-1], self.data["y_gps"][-1])
-            # self.phi = closest_angle(self.angle, self.angle_correct) 
-            self.phi = self.angle_correct
+            self.phi = closest_angle(self.angle, self.angle_correct) 
+            # self.phi = self.angle_correct
             self.data["k1"] = k1
             self.data["k2"] = k2
             self.data["m1"] = m1

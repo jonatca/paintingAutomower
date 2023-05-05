@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 class EKF2D:
     def __init__(self, initial_state, initial_input, initial_covariance, process_noise): #(self, initial_state, initial_input, initial_covariance, process_noise, measurement_noise)
         self.state = initial_state   #state tre varden: x y theta
-        # self.input= initial_input  # tva varden v  omega
+        self.input= initial_input  # tva varden v  omega
         self.P_k = initial_covariance   # vi anvander P_k istallet for bara covariance
         self.Q_k = process_noise    # state model noise, cov matrix
         self.measurement_noise = 0#measurement_noise
@@ -19,7 +19,7 @@ class EKF2D:
                       [np.sin(theta)*dt, 0],
                        [0, dt]])
          return B
-    def predict(self, vel_lin, vel_ang dt):     #delta om vi ska anvanda oss av position istallet for input v o w
+    def predict(self, delta_x, delta_y,delta_ang, dt):     #delta om vi ska anvanda oss av position istallet for input v o w
                                                 #F = np.array([
                                                 #    [1, 0, dt, 0],
                                                 #    [0, 1, 0, dt],
@@ -28,20 +28,19 @@ class EKF2D:
                                                 #])#gammal kod
         
         #  (1): [x(k), y(k), theta(k)]^T = A * [x(k-1), y(k-1),theta(k-1)]^T + B* [v(k-1), omega(k-1)] + noise
-        self.input = [vel_lin, vel_ang]
 
         A = np.array([[1,0,0],
                       [0,1,0],
                       [0,0,1]])
-        B = self.get_B(self.state[2], dt)  #np.array([[np.cos(theta)*dt, 0],
+        B = self.get_B(self.theta, dt)  #np.array([[np.cos(theta)*dt, 0],
                                                 # [np.sin(theta)*dt, 0
                                                     #[0, dt]]])
         
-        # u = np.array([delta_x, delta_y, delta_ang]) # u = np.array([delta_x, delta_y, np.atan2(delta_y/delta_x)])
-        # self.state = np.dot(A, self.state) + u
+        u = np.array([delta_x, delta_y, delta_ang]) # u = np.array([delta_x, delta_y, np.atan2(delta_y/delta_x)])
+        self.state = np.dot(A, self.state) + u
         noise= np.array([[0],[0],[0]]) # ngt ryp av noise far laggas till
 
-        self.state = np.dot(A, self.state) + np.dot(B, self.input) + noise #berakna state funktion med ekv (1)
+        #self.state = np.dot(A, self.state) + np.dot(B, self.input) + noise #berakna state funktion med ekv (1)
        
 
         self.P_k = np.dot(A, np.dot(self.P_k, A.T)) + self.Q_k
@@ -53,7 +52,7 @@ class EKF2D:
       self.measurement_noise = np.eye(3) * measurement_noise
       return self.update(gps_x, gps_y,yaw, self.measurement_noise)
     
-    def update(self, gps_x, gps_y, position_covariance):
+    def update(self, gps_x, gps_y, yaw, position_covariance):
         #self.R_k= position_covariance   #covariance matris for matbara
         self.R_k = position_covariance
         # self.R_k = np.array([[182,0,0],
@@ -62,13 +61,15 @@ class EKF2D:
         H_k = np.array([
             [1, 0, 0 ],
             [0, 1, 0 ],
+            [0, 0, 1]
         ])
-        y_k = np.array([gps_x, gps_y]) - np.dot(H_k, self.state)   # Calculate the difference between the actual sensor measurements
+        y_k = np.array([gps_x, gps_y, yaw]) - np.dot(H_k, self.state)   # Calculate the difference between the actual sensor measurements
                                                                         # at time k minus what the measurement model prmeaedicted 
                                                                         # the sensor measurements would be for the current timestep k.
 
         S_k = np.dot(H_k, np.dot(self.P_k, H_k.T)) + self.R_k           # R_k=position_covariance
         K_k = np.dot(self.P_k, np.dot(H_k.T, np.linalg.inv(S_k)))       #np.linalg.pinv??
+
         self.state = self.state + np.dot(K_k, y_k)
         self.P_k = self.P_k - np.dot(K_k, np.dot(H_k, self.P_k))        #uppdatera state covariance for tid k    # np.dot(np.eye(4) - np.dot(K_k, H_k), self.covariance)
 
