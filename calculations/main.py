@@ -70,6 +70,8 @@ class DriveTo(Node):
                 change_goal(self)
                 self.data["x_start"].append(self.x_start)
                 self.data["y_start"].append(self.y_start)
+                self.data["x_goal"].append(self.calc_velocities.x_goal)
+                self.data["y_goal"].append(self.calc_velocities.y_goal)
             
         self.x = rtk.east
         self.y = rtk.north
@@ -81,6 +83,8 @@ class DriveTo(Node):
         self.data["x"].append(self.x)
         if lin_vel == 0.0 and ang_vel == 0.0:
             change_goal(self)
+            self.data["x_goal"].append(self.calc_velocities.x_goal)
+            self.data["y_goal"].append(self.calc_velocities.y_goal)
 
     def imu_callback(self, imu):
         if  self.init_angle is None:
@@ -90,8 +94,8 @@ class DriveTo(Node):
         #print('ang', self.current_ang)
 
     def move(self):
-        thread = threading.Thread(target=rclpy.spin, args=(self,))
-        thread.start()
+        self.thread = threading.Thread(target=rclpy.spin, args=(self,))
+        self.thread.start()
 
         rate = self.create_rate(self.update_freq)
         while rclpy.ok() and not self.reached_goal:
@@ -99,30 +103,32 @@ class DriveTo(Node):
             print(self.msg)
             self.drive_publisher.publish(self.msg)
             rate.sleep()
+            x = self.data["x"]
+            y = self.data["y"]
+            x_goal = self.data["x_goal"]
+            y_goal = self.data["y_goal"]
+            plt.plot(x, y, "o-", label="Path", markersize=3)
+            plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
+            # print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
+            plt.xlabel("x ")
+            plt.ylabel("y ")
+            plt.title("Path and Goal")
+            plt.legend()
+            plt.axis("equal")
+            timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            timestamp = int(timestamp.replace("-", ""))
         self.stop()
-        rclpy.shutdown()
-        thread.join()
         
     def stop(self):
         self.msg.speed = 0.0
         self. msg.steering = 0.0
         self.drive_publisher.publish(self.msg)
         print('x:',self.data["x"], 'y:',self.data["y"])
-        rclpy.shutdown()
-        plt.plot(self.x, self.y, "o-", label="Path", markersize=3)
-        plt.plot(self.calc_velocities.x_goal, self.calc_velocities.y_goal, "rx", markersize=3, label="Goal")
-        # print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
-        plt.xlabel("x ")
-        plt.ylabel("y ")
-        plt.title("Path and Goal")
-        plt.legend()
-        plt.axis("equal")
-        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        timestamp = int(timestamp.replace("-", ""))
         
     def ctrlc_shutdown(self, sig, frame):
         self.stop()
-        rclpy.signal_shutdown("User interrupted by ctrl+c")
+        rclpy.shutdown()
+        self.thread.join()
 
 
 if __name__ == '__main__':
