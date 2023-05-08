@@ -85,8 +85,8 @@ class Drive_to:
             self.data["lon"].append(self.lon_start)
         lat = fix.latitude
         lon = fix.longitude
-        # x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
         x_gps, y_gps = convert_lat_lon_to_utm(lat, lon)
+        # y_gps = (y_gps - self.data["y_gps"][0])*(-1) + self.data["y_gps"][0] #TODO test this
         if len(self.data["x_gps"]) == self.min_data_points:
             k1,m1 = best_fit_line(self.data["x_gps"], self.data["y_gps"])
             k2, m2 = best_fit_line(self.data["x"], self.data["y"])
@@ -112,8 +112,7 @@ class Drive_to:
         self.data["covariance"].append(gps_covariance)
         gps_angle = None
         if self.phi != 0:
-            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
-            # y_gps = (y_gps - self.data["y_gps"][0])*(-1) + self.data["y_gps"][0]
+            x_gps, y_gps = rotate_point(x_gps, y_gps, self.data["x_gps"][0], self.data["y_gps"][0], -self.phi) 
             if len(self.data["x_gps"]) > self.min_data_points:
                 gps_angle = np.arctan2(y_gps - self.data["y_gps"][-1], x_gps - self.data["x_gps"][-1])
             else:
