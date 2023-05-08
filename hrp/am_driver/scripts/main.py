@@ -57,7 +57,7 @@ class Drive_to:
         self.lat_start = None
         self.lon_start = None
         self.covariance = None
-        self.gps_covariance_factor = 0.05 #0.07
+        self.gps_covariance_factor = 0.1
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -69,13 +69,13 @@ class Drive_to:
         self.order = get_paint_order()
         self.angle_north = 0#np.pi 
         self.phi = 0
-        self.min_data_points = 15
+        self.min_data_points = 20
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
             self.lat_start = fix.latitude
             self.lon_start = fix.longitude
-            if self.lat_start <= 10:
+            if self.lat_start <= 5:
                 self.lat_start = 57.68727
                 self.lon_start = 11.97958
             self.data["lat_start"].append(self.lat_start)
@@ -93,7 +93,7 @@ class Drive_to:
             self.angle = angle_between_lines(k1, m1, k2, m2)
             self.angle_correct = angle_between_points(self.data["x_gps"][0], self.data["y_gps"][0], self.data["x_gps"][-1], self.data["y_gps"][-1])
             self.phi = closest_angle(self.angle, self.angle_correct) 
-            # self.phi = self.angle_correct
+            self.phi = self.angle_correct
             self.data["k1"] = k1
             self.data["k2"] = k2
             self.data["m1"] = m1
@@ -104,7 +104,7 @@ class Drive_to:
             process_noise = np.eye(3) * 0.001 
             self.ekf = EKF2D(initial_state, initial_input, initial_covariance, process_noise)
         elif len(self.data["x_gps"]) < self.min_data_points:
-            self.calc_velocities.max_vel_lin = 0.2
+            self.calc_velocities.max_vel_lin = 0.1
         else:
             self.calc_velocities.max_vel_lin = 0.4
 
@@ -112,7 +112,8 @@ class Drive_to:
         self.data["covariance"].append(gps_covariance)
         gps_angle = None
         if self.phi != 0:
-            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, self.phi) 
+            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
+            # y_gps = (y_gps - self.data["y_gps"][0])*(-1) + self.data["y_gps"][0]
             if len(self.data["x_gps"]) > self.min_data_points:
                 gps_angle = np.arctan2(y_gps - self.data["y_gps"][-1], x_gps - self.data["x_gps"][-1])
             else:
@@ -195,14 +196,17 @@ class Drive_to:
                 self.ekf.predict(delta_x, delta_y,delta_ang, dt)
                 self.x,self.y, current_ang2 = self.ekf.get_state()
                 #normailize angle
-                while current_ang2 > np.pi:
-                    current_ang2 -= 2 * np.pi
-                while current_ang2 < -np.pi:
-                    current_ang2 += 2 * np.pi
-                self.data["angle"].append(current_ang2)
+                # while current_ang2 > np.pi:
+                #     current_ang2 -= 2 * np.pi
+                # while current_ang2 < -np.pi:
+                #     current_ang2 += 2 * np.pi
+                # self.data["angle"].append(current_ang2)
             self.data["x"].append(self.x)
             self.data["y"].append(self.y)
             lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
+            # if lin_vel != 0:
+            #     current_ang = np.arctan2(self.data["y"][-1] - self.data["y"][-2], self.data["x"][-1] - self.data["x"][-2])
+            #     lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
             self.twist.linear.x = lin_vel
             self.twist.angular.z = ang_vel
             try:
