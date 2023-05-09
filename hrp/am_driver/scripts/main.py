@@ -86,8 +86,8 @@ class Drive_to:
             self.data["lon"].append(self.lon_start)
         lat = fix.latitude
         lon = fix.longitude
-        # x_gps, y_gps = self.convert_to_xy(fix.latitude, fix.longitude, self.lat_start, self.lon_start)
         x_gps, y_gps = convert_lat_lon_to_utm(lat, lon)
+        # y_gps = (y_gps - self.data["y_gps"][0])*(-1) + self.data["y_gps"][0] #TODO test this
         if len(self.data["x_gps"]) == self.min_data_points:
             k1,m1 = best_fit_line(self.data["x_gps"], self.data["y_gps"])
             k2, m2 = best_fit_line(self.data["x"], self.data["y"])
