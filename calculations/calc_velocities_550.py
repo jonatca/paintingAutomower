@@ -64,6 +64,7 @@ class CalcVelocities:
         while angle < -np.pi:
             angle += 2 * np.pi
         return angle
+    
     def goal_angle(self):
             return np.arctan2(self.y_goal - self.y, self.x_goal - self.x)
         #self.error_ang = np.arctan2(np.sin(self.error_ang), np.cos(self.error_ang))

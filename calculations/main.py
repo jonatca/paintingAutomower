@@ -16,7 +16,7 @@ from hqv_public_interface.msg import MowerGnssRtkRelativePositionENU
 import numpy as np
 from calc_velocities_550 import CalcVelocities
 from paint import get_paint_order
-from plot_data2 import plot_data
+#from plot_data2 import plot_data
 from change_goal_550 import change_goal
 from coord_sys_trans import *
 import datetime
@@ -94,6 +94,8 @@ class DriveTo(Node):
         #print('ang', self.current_ang)
 
     def move(self):
+        signal.signal(signal.SIGINT, self.ctrlc_shutdown)
+
         self.thread = threading.Thread(target=rclpy.spin, args=(self,))
         self.thread.start()
 
@@ -103,32 +105,29 @@ class DriveTo(Node):
             print(self.msg)
             self.drive_publisher.publish(self.msg)
             rate.sleep()
-            x = self.data["x"]
-            y = self.data["y"]
-            x_goal = self.data["x_goal"]
-            y_goal = self.data["y_goal"]
-            plt.plot(x, y, "o-", label="Path", markersize=3)
-            plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
-            # print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
-            plt.xlabel("x ")
-            plt.ylabel("y ")
-            plt.title("Path and Goal")
-            plt.legend()
-            plt.axis("equal")
-            timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-            timestamp = int(timestamp.replace("-", ""))
         self.stop()
         
     def stop(self):
         self.msg.speed = 0.0
         self. msg.steering = 0.0
         self.drive_publisher.publish(self.msg)
+        print('STOP!!!')
+        plt.plot(self.data["x"], self.data["y"], "o-", label="Path", markersize=3)
+        plt.plot(self.data["x_goal"], self.data["y_goal"], "rx", markersize=3, label="Goal")
+        plt.xlabel("x ")
+        plt.ylabel("y ")
+        plt.show(block=True)
+        # print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
+        #plt.xlabel("x ")
+        #plt.ylabel("y ")
+        #plt.title("Path and Goal")
+        #plt.legend()
+        #plt.axis("equal")
         print('x:',self.data["x"], 'y:',self.data["y"])
         
     def ctrlc_shutdown(self, sig, frame):
         self.stop()
         rclpy.shutdown()
-        self.thread.join()
 
 
 if __name__ == '__main__':
