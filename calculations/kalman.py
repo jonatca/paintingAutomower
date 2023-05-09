@@ -48,9 +48,14 @@ class EKF2D:
     def get_state(self):
         return self.state
     
-    def update_gps(self, gps_x, gps_y,yaw, measurement_noise): #fixa funktion sen?
-      self.measurement_noise = np.eye(3) * measurement_noise
-      return self.update(gps_x, gps_y,yaw, self.measurement_noise)
+    def update_gps(self, gps_x, gps_y,yaw, measurement_noise, angle_noise): 
+        # self.measurement_noise = np.eye(3) * measurement_noise
+        self.measurement_noise = np.array([
+            [measurement_noise, 0, 0 ],
+            [0, measurement_noise, 0 ],
+            [0, 0, angle_noise]
+        ])
+        return self.update(gps_x, gps_y,yaw, self.measurement_noise)
     
     def update(self, gps_x, gps_y, yaw, position_covariance):
         #self.R_k= position_covariance   #covariance matris for matbara

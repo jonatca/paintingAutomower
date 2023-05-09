@@ -58,6 +58,7 @@ class Drive_to:
         self.lon_start = None
         self.covariance = None
         self.gps_covariance_factor = 0.01
+        self.gps_angle_factor = 3
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -69,8 +70,8 @@ class Drive_to:
         self.order = get_paint_order()
         self.angle_north = 0#np.pi 
         self.phi = 0
-        self.min_data_points = 1
-        self.phi_always = -0.96#-0.9783404808#-1 #-0.9224036087
+        self.min_data_points = 7
+        self.phi_always = -0.942#-0.96#-0.9783404808#-1 #-0.9224036087
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -122,7 +123,8 @@ class Drive_to:
             else:
                 gps_angle = 0
             gps_covariance = int(gps_covariance) * self.gps_covariance_factor 
-            self.ekf.update_gps(x_gps, y_gps,gps_angle, gps_covariance)
+            gps_angle_covariance = gps_covariance * self.gps_angle_factor
+            self.ekf.update_gps(x_gps, y_gps,gps_angle, gps_covariance, gps_angle_covariance)
         self.data["GPS_angle"] = gps_angle
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
