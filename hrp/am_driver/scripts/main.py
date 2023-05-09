@@ -57,7 +57,8 @@ class Drive_to:
         self.lat_start = None
         self.lon_start = None
         self.covariance = None
-        self.gps_covariance_factor = 0.1
+        self.gps_covariance_factor = 0.01
+        self.gps_angle_factor = 3
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -69,7 +70,8 @@ class Drive_to:
         self.order = get_paint_order()
         self.angle_north = 0#np.pi 
         self.phi = 0
-        self.min_data_points = 20
+        self.min_data_points = 7
+        self.phi_always = -0.942#-0.96#-0.9783404808#-1 #-0.9224036087
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -94,6 +96,7 @@ class Drive_to:
             self.angle_correct = angle_between_points(self.data["x_gps"][0], self.data["y_gps"][0], self.data["x_gps"][-1], self.data["y_gps"][-1])
             self.phi = closest_angle(self.angle, self.angle_correct) 
             self.phi = self.angle_correct
+            self.phi = self.phi_always
             self.data["k1"] = k1
             self.data["k2"] = k2
             self.data["m1"] = m1
@@ -106,19 +109,22 @@ class Drive_to:
         elif len(self.data["x_gps"]) < self.min_data_points:
             self.calc_velocities.max_vel_lin = 0.1
         else:
-            self.calc_velocities.max_vel_lin = 0.4
+            self.calc_velocities.max_vel_lin = 0.3
 
         gps_covariance = fix.position_covariance[0]
         self.data["covariance"].append(gps_covariance)
         gps_angle = None
         if self.phi != 0:
-            x_gps, y_gps = rotate_point(x_gps, y_gps, self.data["x_gps"][0], self.data["y_gps"][0], -self.phi) 
+            # self.phi = 0
+            x_gps, y_gps = rotate_point(x_gps, y_gps, self.x_start, self.y_start, -self.phi) 
+            # y_gps = (y_gps - self.data["y_gps"][0])*(-1) + self.data["y_gps"][0]
             if len(self.data["x_gps"]) > self.min_data_points:
                 gps_angle = np.arctan2(y_gps - self.data["y_gps"][-1], x_gps - self.data["x_gps"][-1])
             else:
                 gps_angle = 0
             gps_covariance = int(gps_covariance) * self.gps_covariance_factor 
-            self.ekf.update_gps(x_gps, y_gps,gps_angle, gps_covariance)
+            gps_angle_covariance = gps_covariance * self.gps_angle_factor
+            self.ekf.update_gps(x_gps, y_gps,gps_angle, gps_covariance, gps_angle_covariance)
         self.data["GPS_angle"] = gps_angle
         self.data["x_gps"].append(x_gps)
         self.data["y_gps"].append(y_gps)
@@ -189,11 +195,13 @@ class Drive_to:
                 delta_x = self.data["x_ordometry"][-1] - self.data["x_ordometry"][-2]
                 delta_y = self.data["y_ordometry"][-1] - self.data["y_ordometry"][-2]
                 # delta_ang = self.data["angle"][-1] - self.data["angle"][-2]
-                delta_ang = np.arctan2(delta_y, delta_x)
+                # delta_ang = np.arctan2(delta_y, delta_x)
+                delta_ang = self.data["angle_ordometry"][-1] - self.data["angle_ordometry"][-2]
                 # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
                 dt = 1 / self.update_freq
                 self.ekf.predict(delta_x, delta_y,delta_ang, dt)
-                self.x,self.y, current_ang2 = self.ekf.get_state()
+                self.x,self.y, current_ang = self.ekf.get_state()
+                print(current_ang)
                 #normailize angle
                 # while current_ang2 > np.pi:
                 #     current_ang2 -= 2 * np.pi
