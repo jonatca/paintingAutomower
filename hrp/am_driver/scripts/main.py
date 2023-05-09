@@ -70,7 +70,7 @@ class Drive_to:
         self.angle_north = 0#np.pi 
         self.phi = 0
         self.min_data_points = 1
-        self.phi_always = -0.9783404808#-1 #-0.9224036087
+        self.phi_always = -0.96#-0.9783404808#-1 #-0.9224036087
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -193,11 +193,13 @@ class Drive_to:
                 delta_x = self.data["x_ordometry"][-1] - self.data["x_ordometry"][-2]
                 delta_y = self.data["y_ordometry"][-1] - self.data["y_ordometry"][-2]
                 # delta_ang = self.data["angle"][-1] - self.data["angle"][-2]
-                delta_ang = np.arctan2(delta_y, delta_x)
+                # delta_ang = np.arctan2(delta_y, delta_x)
+                delta_ang = self.data["angle_ordometry"][-1] - self.data["angle_ordometry"][-2]
                 # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
                 dt = 1 / self.update_freq
                 self.ekf.predict(delta_x, delta_y,delta_ang, dt)
-                self.x,self.y, current_ang2 = self.ekf.get_state()
+                self.x,self.y, current_ang = self.ekf.get_state()
+                print(current_ang)
                 #normailize angle
                 # while current_ang2 > np.pi:
                 #     current_ang2 -= 2 * np.pi
