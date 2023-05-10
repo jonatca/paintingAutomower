@@ -57,8 +57,8 @@ class Drive_to:
         self.lat_start = None
         self.lon_start = None
         self.covariance = None
-        self.gps_covariance_factor = 0.01
-        self.gps_angle_factor = 3
+        self.gps_covariance_factor = 0.009
+        self.gps_angle_factor = 4
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -70,8 +70,8 @@ class Drive_to:
         self.order = get_paint_order()
         self.angle_north = 0#np.pi 
         self.phi = 0
-        self.min_data_points = 7
-        self.phi_always = -0.942#-0.96#-0.9783404808#-1 #-0.9224036087
+        self.min_data_points = 3
+        self.phi_always = 0#-0.897701#-0.942#-0.96#-0.9783404808#-1 #-0.9224036087
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -132,7 +132,8 @@ class Drive_to:
         self.data["lon"].append(lon)
         self.data["angle_north"].append(self.angle_north)
         self.calc_velocities.log_message()
-
+        print("x_gps", x_gps)
+        print("y_gps", y_gps)
 
     def drive(self):
         signal.signal(
@@ -200,7 +201,7 @@ class Drive_to:
                 # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
                 dt = 1 / self.update_freq
                 self.ekf.predict(delta_x, delta_y,delta_ang, dt)
-                self.x,self.y, current_ang = self.ekf.get_state()
+                # self.x,self.y, current_ang = self.ekf.get_state()
                 print(current_ang)
                 #normailize angle
                 # while current_ang2 > np.pi:
