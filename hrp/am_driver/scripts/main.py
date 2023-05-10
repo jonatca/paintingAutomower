@@ -57,8 +57,8 @@ class Drive_to:
         self.lat_start = None
         self.lon_start = None
         self.covariance = None
-        self.gps_covariance_factor = 0.009
-        self.gps_angle_factor = 4
+        self.gps_covariance_factor = 0.01
+        self.gps_angle_factor = 3
 
         self.calc_velocities = None  
         self.reached_goal = False
@@ -71,7 +71,7 @@ class Drive_to:
         self.angle_north = 0#np.pi 
         self.phi = 0
         self.min_data_points = 3
-        self.phi_always = 0#-0.897701#-0.942#-0.96#-0.9783404808#-1 #-0.9224036087
+        self.phi_always = -0.9313#-0.897701#-0.942#-0.96#-0.9783404808#-1 #-0.9224036087
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -109,7 +109,7 @@ class Drive_to:
         elif len(self.data["x_gps"]) < self.min_data_points:
             self.calc_velocities.max_vel_lin = 0.1
         else:
-            self.calc_velocities.max_vel_lin = 0.3
+            self.calc_velocities.max_vel_lin = 0.4
 
         gps_covariance = fix.position_covariance[0]
         self.data["covariance"].append(gps_covariance)
@@ -201,7 +201,7 @@ class Drive_to:
                 # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
                 dt = 1 / self.update_freq
                 self.ekf.predict(delta_x, delta_y,delta_ang, dt)
-                # self.x,self.y, current_ang = self.ekf.get_state()
+                self.x,self.y, current_ang = self.ekf.get_state()
                 print(current_ang)
                 #normailize angle
                 # while current_ang2 > np.pi:
