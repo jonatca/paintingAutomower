@@ -8,10 +8,10 @@ from change_goal import change_goal
 
 class Simulate:
     def __init__(self, calc_velocities=None):
-        self.max_time = 30000
+        self.max_time = 6000
         paint_order = get_paint_order()
-        # comb_cut_order = get_comb_cut_order()
-        self.order = paint_order # valj om comb_cut eller paint order
+        comb_cut_order = get_comb_cut_order()
+        self.order = comb_cut_order # valj om comb_cut eller paint order
         self.tot_num_lines = len(self.order)
         self.update_freq = 10  # Hz but doesn't work? stuck at 10 Hz
 
