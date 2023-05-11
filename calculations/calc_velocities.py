@@ -203,3 +203,14 @@ class CalcVelocities:
     def set_goal_coords(self, x_goal, y_goal):
         self.x_goal = x_goal
         self.y_goal = y_goal
+
+    def circ_lqr(self, x_goal, y_goal, theta_goal):
+        self.x_goal=x_goal
+        self.y_goal = y_goal
+        self.theta_goal = theta_goal
+
+        r=np.sqrt((self.x-self.x_goal)**2+(self.y-self.y_goal)**2)/2
+        dist=r*np.pi
+        time=self.vel_lin/dist
+        antal_dt = time/self.dt   #vill dela upp cirkeln i sma segment dl som är en sträcka med hastigheten och dt
+

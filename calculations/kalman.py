@@ -49,9 +49,9 @@ class EKF2D:
     
     def update(self, gps_x, gps_y, position_covariance):
         #self.R_k= position_covariance   #covariance matris för mätbara
-        self.R_k = np.array([[182,0,0],
-                             [0,182,0],
-                             [0,0,182]])
+        self.R_k = np.array([[1,0,0],  #182
+                             [0,1,0],
+                             [0,0,1]])
         H_k = np.array([
             [1, 0, 0 ],
             [0, 1, 0 ],
@@ -73,7 +73,7 @@ class EKF2D:
 # Initialize the EKF
 initial_state = np.array([0, 0, 0])
 initial_input = np.array([0.3, 0.0])
-initial_covariance =np.array([[0.1,0,0],[0,0.1,0],[0,0,0.1]])  # np.eye(3) * 0.1 np.array([[1,0,0],[0,1,0],[0,0,1]])
+initial_covariance =np.array([[10,0,0],[0,10,0],[0,0,10]])  # np.eye(3) * 0.1 np.array([[1,0,0],[0,1,0],[0,0,1]])   0.1
 process_noise = np.eye(3) * 0.001
 position_covariance = np.eye(2) * 0.01
 measurment_noise = np.eye(4) * 0.001
