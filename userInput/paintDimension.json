@@ -1,6 +1,6 @@
 {
-  "shortside": "0.5",
-  "longside": "0.5",
+  "shortside": "50",
+  "longside": "20",
   "penaltyAreaHeight": "16.5",
   "penaltyAreaWidth": "40.3",
   "goalBoxHeight": "5.5",
@@ -9,5 +9,5 @@
   "centerCircleDiameter": "9.15",
   "cornerArcRadius": "1",
   "penaltyArcRadius": "9.15",
-  "numCombLines": "10"
+  "numCombLines": "4"
 }

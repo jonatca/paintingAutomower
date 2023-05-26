@@ -1,5 +1,5 @@
 from __future__ import print_function
-import qwiic_icm20948
+#import qwiic_icm20948
 import time
 import sys
 import math

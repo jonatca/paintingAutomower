@@ -144,15 +144,15 @@ def plot_data(GPS=True, filename="data.json"):
         plt.gca().add_patch(circle)
     except:
         pass
-    plt.plot(x, y, "o-", label="Path Ordometri", markersize=3)
-    plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
+    line1, = plt.plot(x, y, "o-", label="Path", markersize=3)
+    line2, = plt.plot(x_goal, y_goal, "rx", markersize=3, label="Goal")
     if GPS:
         plt.plot(x_gps, y_gps, "o-", label="Path GPS", markersize=1)
     # print(np.arctan2(np.mean(x_gps[0:70]) - y[0], np.mean(y_gps[0:70]) - x[0]), "angle_start3")
     plt.xlabel("x ")
     plt.ylabel("y ")
     plt.title("Path and Goal")
-    plt.legend()
+    plt.legend(handles = [line1, line2])
     plt.axis("equal")
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     timestamp = int(timestamp.replace("-", ""))
