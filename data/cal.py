@@ -10,7 +10,7 @@ def read_json(filename):
     with open(filename, 'r') as f:
         data = json.load(f)
     ang_list = []
-    for i in range(3, 7):
+    for i in range(5, 15):
         ang = calc_angle(i, data)
         ang_list.append(ang)
 
@@ -27,13 +27,13 @@ def calc_angle(offset, data):
     return ang1
 
 if __name__ == "__main__":
-    filename = "20230510130826.json"
+    filename = "20230510154609.json"
     ang_mean1 = read_json(filename)
-    filename = "20230510130412.json"
-    ang_mean2 = read_json(filename)
-    filename = "20230510130013.json"
-    ang_mean3 = read_json(filename)
-    ang_mean = np.mean([ang_mean1, ang_mean2, ang_mean3])
+    # filename = "20230510153400.json"
+    # ang_mean2 = read_json(filename)
+    # filename = "20230510130013.json"
+    # ang_mean3 = read_json(filename)
+    ang_mean = np.mean([ang_mean1])
     print(ang_mean)
 
 

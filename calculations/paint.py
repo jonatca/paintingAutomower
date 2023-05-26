@@ -153,31 +153,61 @@ def get_paint_order():
         "type": "circle",
         "direction": "positive",
     }
-    len_square = 40
+    len_square = 1.5
+    len_square2 = 0.5#16.5
     test_line1 = {
         "end": (len_square, 0),
         "type": "line",
     }
     test_line2 = {
-        "end": (len_square, len_square) ,
+        "end": (len_square, len_square2) ,
         "type": "line",
     }
     test_line3 = {
-        "end": (0, len_square) ,
+        "end": (0, len_square2) ,
         "type": "line",
     }
     test_line4 = {
         "end": (0, 0) ,
         "type": "line",
     }
+    
+#     test_line22 = {
+#     "end": (2*len_square, 0) ,
+#     "type": "line",
+# }
+#     test_line33 = {
+#         "end": (3*len_square, 0) ,
+#         "type": "line",
+#     }
+#     test_line44 = {
+#         "end": (4*len_square, 0) ,
+#         "type": "line",
+#     }
 
     
 
     paint_order = [
         # test_circle
         test_line1,
-        # test_line2,
-        # test_line3,
+        test_line2,
+        test_line3,
+        test_line4,
+        # test_line1,
+        # test_line4,
+        # test_line1,
+        # test_line4,
+        # test_line1,
+        # test_line4,
+        # test_line1,
+        # test_line4,
+        # test_line1,
+        # test_line4,
+        # test_line1,
+        # test_line4,
+        # test_line1,
+        # test_line4,
+        # test_line1,
         # test_line4,
         # test_line2
         # shortside_down,

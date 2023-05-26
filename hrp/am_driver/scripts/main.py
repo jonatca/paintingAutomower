@@ -70,8 +70,8 @@ class Drive_to:
         self.order = get_paint_order()
         self.angle_north = 0#np.pi 
         self.phi = 0
-        self.min_data_points = 3
-        self.phi_always = -0.9313#-0.897701#-0.942#-0.96#-0.9783404808#-1 #-0.9224036087
+        self.min_data_points = 1
+        self.phi_always = -0.92056724357469599#-0.91069129154146979#-0.9715#-0.897701#-0.942#-0.96#-0.9783404808#-1 #-0.9224036087
     
     def gps_callback(self, fix):
         if self.lat_start is None and self.lon_start is None:
@@ -97,6 +97,7 @@ class Drive_to:
             self.phi = closest_angle(self.angle, self.angle_correct) 
             self.phi = self.angle_correct
             self.phi = self.phi_always
+            self.phi = 0
             self.data["k1"] = k1
             self.data["k2"] = k2
             self.data["m1"] = m1
@@ -107,9 +108,9 @@ class Drive_to:
             process_noise = np.eye(3) * 0.001 
             self.ekf = EKF2D(initial_state, initial_input, initial_covariance, process_noise)
         elif len(self.data["x_gps"]) < self.min_data_points:
-            self.calc_velocities.max_vel_lin = 0.1
+            self.calc_velocities.max_vel_lin = 0.3
         else:
-            self.calc_velocities.max_vel_lin = 0.4
+            self.calc_velocities.max_vel_lin = 0.3
 
         gps_covariance = fix.position_covariance[0]
         self.data["covariance"].append(gps_covariance)
@@ -201,7 +202,14 @@ class Drive_to:
                 # measurement_angle = np.arctan2(delta_y, delta_x) - self.ekf.get_state()[2]
                 dt = 1 / self.update_freq
                 self.ekf.predict(delta_x, delta_y,delta_ang, dt)
-                self.x,self.y, current_ang = self.ekf.get_state()
+                # self.x,self.y, current_ang = self.ekf.get_state()
+                self.x = self.data["x_gps"][-1]
+                self.y = self.data["y_gps"][-1]
+                # current_ang = float(self.data["GPS_angle"][-1])
+                if self.data["last_lin_vel"] > 0.1:
+                    # current_ang = self.data["angle_ordometry"][-1]
+                    # current_ang = np.arctan2(self.data["y"][-1] - self.data["y"][-2], self.data["x"][-1] - self.data["x"][-2])
+                    pass
                 print(current_ang)
                 #normailize angle
                 # while current_ang2 > np.pi:
@@ -217,6 +225,7 @@ class Drive_to:
             #     lin_vel, ang_vel = self.calc_velocities.calc_vel(current_ang, self.x, self.y)
             self.twist.linear.x = lin_vel
             self.twist.angular.z = ang_vel
+            self.data["last_lin_vel"] = lin_vel
             try:
                 print("angle kalman", current_ang, "ordometry_angle", self.data["angle_ordometry"][-1], "gps_angle", self.data["GPS_angle"][-1]) 
             except:
